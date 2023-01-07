@@ -1,5 +1,23 @@
-<p>
-<%=user.name%><br>
-<%=user.email%>
-</p>
-<a href="/signout">SIGN OUT</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2><%=user.name%></h2>
+    
+
+    <section>
+             <h4>Posts</h4>
+             <form action="" id="new-post-form" method="POST">
+                 <textarea name="content" cols="30" rows="3"></textarea><br>
+                 <input type="submit" value="Post">
+                  
+             </form>
+    </section>
+    <a href="/signout">SIGN OUT</a>
+</body>
+</html>
