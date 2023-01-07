@@ -10,7 +10,7 @@ router.get('/',homecontroller.home);
 router.get('/sign_up',userController.signUp);
 router.get('/signin',userController.signIn);
 
-//use passport as a middleware to authenticate
+//use passport as a middleware 
 router.post('/create-session',passport.authenticate(
    'local',
    {failureRedirect:'signin'}
