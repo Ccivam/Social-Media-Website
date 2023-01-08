@@ -22,13 +22,14 @@
         
     </section>
     <%}%>
+    <h4>POSTS</h4>
     <div id="posts-list-container">
         <ul>
            <% for(post of posts){%>
              <li>
                 <p>
                <%=post.content%><br>
-               <small><%=post.user.name%></small>
+             <small>Posted by</small><br><small><%=post.user.name%></small>
                 </p>
              </li>
 
