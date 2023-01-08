@@ -10,6 +10,31 @@
     <h1>home</h1>
     <a href="/sign_up"><h3>Sign Up</h3></a><br>
     <a href="/signin"><h3>Sign in</h3></a>
+    <%if(locals.user){%>
+    <section>
+        <h4>Posts</h4>
+       
+        <form action="/post/create" id="new-post-form" method="POST">
+            <textarea name="content" cols="30" rows="3" required></textarea><br>
+            <input type="submit" value="Post">
+            
+        </form>
+        
+    </section>
+    <%}%>
+    <div id="posts-list-container">
+        <ul>
+           <% for(post of posts){%>
+             <li>
+                <p>
+               <%=post.content%><br>
+               <small><%=post.user.name%></small>
+                </p>
+             </li>
+
+           <%}%>
+        </ul>
+   </div>
     
 </body>
 </html>
