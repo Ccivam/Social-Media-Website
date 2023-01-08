@@ -9,7 +9,7 @@ const User = require('../model/user');
 router.get('/',homecontroller.home);
 router.get('/sign_up',userController.signUp);
 router.get('/signin',userController.signIn);
-
+router.use('/post',require('./post'));
 //use passport as a middleware 
 router.post('/create-session',passport.authenticate(
    'local',

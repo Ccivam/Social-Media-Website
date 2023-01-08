@@ -1,4 +1,5 @@
 const Us=require("../model/user");
+const Post=require('../model/post');
 module.exports.signUp=function(req,res){
    // console.log(req.cookies);
    if(req.isAuthenticated()){
@@ -7,7 +8,7 @@ module.exports.signUp=function(req,res){
    return res.render('user_sign_up',{
     title:"codeial|sign up"
    });
-}
+    }
 module.exports.signIn=function(req,res){
     if(req.isAuthenticated()){
        return res.redirect('/profile');
@@ -22,9 +23,17 @@ module.exports.createSession=function(req,res){
        return res.redirect('/profile');
     }
 module.exports.profile=function(req,res){
-    res.render('user_profile',{
-        user:res.locals.user
-    });
+    
+   // Post.find({},function(err,post){
+     //   return res.render('user_profile',{
+       //    posts:post
+        //});
+   //});
+   Post.find({}).populate('user').exec(function(err,posts){
+    return res.render('user_profile',{
+        posts:posts
+    })
+   })
 
 }
 module.exports.destroySession=function(req,res){
