@@ -21,11 +21,16 @@
            <% for(post of posts){%>
              <li>
                 <p>
+                    <%if ((locals.user) && (locals.user.id==post.user.id)){%>
+                    <small>
+                        <a href="/post/destroy/<%=post.id%>">DELETE</a><br>
+                    </small>
+                    <%}%>
                <%=post.content%><br>
                <small><%=post.user.name%></small>
                 </p>
                 <div class="post-comments">
-                    <%if (locals.user){%>
+                   <%if (locals.user){%>
                          <form action="/comments/create" method="post">
                             <input type="text" name="content" placeholder="Type here to add comments...">
                             <input type="hidden" name="post" value="<%=post._id%>">
@@ -35,13 +40,23 @@
                     
                     <div class="post-comments-list">
                         <ul id="post-comments-<%=post._id%>">
+                            
                             <%for (comments of post.comment){%>
+                                <li>
                                 <p>
+                                    <%if (locals.user&&(locals.user.id==comments.user.id || locals.user.id==comments.post)){%>
+                                        <small>
+                                         <a href="/comments/destroy/<%=comments._id%>">DELETE</a>
+                                        </small>
+                                    <%}%>   
                                  <%=comments.content%>
+
                                  <br>
                                  <%=comments.user.name%>
                                 </p>
-                             <%}%>   
+                                </li>
+                             <%}%>
+                            
                         </ul>
 
                     </div>
