@@ -13,6 +13,7 @@ app.use(express.urlencoded());
 app.use(cookieParser());
 app.set('view engine','ejs');
 app.set('views','./views');
+
 //mongo store is use to store the session cookie in the db
 app.use(session({
     name:'codeial',
@@ -36,4 +37,5 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(passport.setAuthenticatedUser);
 app.use('/',require('./routes/users'));
+
 app.listen(port);
