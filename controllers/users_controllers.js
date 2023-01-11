@@ -29,7 +29,16 @@ module.exports.profile=function(req,res){
        //    posts:post
         //});
    //});
-   Post.find({}).populate('user').exec(function(err,posts){
+   Post.find({})
+   .populate('user')
+   .populate({
+      path:'comment',
+      populate:{
+      path:'user'
+      }
+      
+   })
+   .exec(function(err,posts){
     return res.render('user_profile',{
         posts:posts
     })

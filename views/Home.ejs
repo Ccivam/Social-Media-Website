@@ -13,13 +13,10 @@
     <%if(locals.user){%>
     <section>
         <h4>Posts</h4>
-       
         <form action="/post/create" id="new-post-form" method="POST">
-            <textarea name="content" cols="30" rows="3" required></textarea><br>
-            <input type="submit" value="Post">
-            
+        <textarea name="content" cols="30" rows="3" required></textarea><br>
+        <input type="submit" value="Post">
         </form>
-        
     </section>
     <%}%>
     <h4>POSTS</h4>
@@ -31,8 +28,29 @@
                <%=post.content%><br>
              <small>Posted by</small><br><small><%=post.user.name%></small>
                 </p>
-             </li>
+                <div class="post-comments">
+                  <%if (locals.user){%>
+                       <form action="/comments/create" method="post">
+                          <input type="text" name="content" placeholder="Type here to add comments...">
+                          <input type="hidden" name="post" value="<%=post._id%>">
+                          <input type="submit" value="Add Comment">
+                       </form>
+                  <%}%>
+                  
+                  <div class="post-comments-list">
+                      <ul id="post-comments-<%=post._id%>">
+                          <%for (comments of post.comment){%>
+                              <p>
+                               <%=comments.content%>
+                               <br>
+                               <%=comments.user.name%>
+                              </p>
+                           <%}%>   
+                      </ul>
 
+                  </div>
+              </div>
+             </li>
            <%}%>
         </ul>
    </div>

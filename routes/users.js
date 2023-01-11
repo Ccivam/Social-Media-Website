@@ -10,6 +10,7 @@ router.get('/',homecontroller.home);
 router.get('/sign_up',userController.signUp);
 router.get('/signin',userController.signIn);
 router.use('/post',require('./post'));
+router.use('/comments',require('./comments'));
 //use passport as a middleware 
 router.post('/create-session',passport.authenticate(
    'local',
