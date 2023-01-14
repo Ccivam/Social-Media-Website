@@ -9,8 +9,10 @@
 <body>
     <%if(profile_user){%>
     <h2><%=profile_user.name%></h2>
+    <h2><%=profile_user.email%></h2>
     <%}else{%>
         <h2><%=locals.user.name%></h2>
+        <h2><%=locals.user.email%></h2>
     <%}%>
     <%if(!profile_user){%>
         <p>UPDATE INFORMATION:</p>
@@ -21,6 +23,7 @@
            
         </form>
     <%}%>
+    <%if(!profile_user){%>
     <section>
         <h4>Posts</h4>
         <form action="/post/create" id="new-post-form" method="POST">
@@ -29,6 +32,7 @@
             
         </form>
     </section>
+    <%}%>
     <div id="posts-list-container">
         <ul>
            <% for(post of posts){%>
