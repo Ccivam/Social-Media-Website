@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
     <title>Document</title>
 </head>
 <body>
-    <%if(flash.success&&flash.success.length>0){%>
-        <h5>
-            <%=flash.success%>
-        </h5>
-    <%}%>
+   
     <%if(profile_user){%>
     <h2><%=profile_user.name%></h2>
     <h2><%=profile_user.email%></h2>
@@ -87,7 +85,8 @@
           
            <%}%>
         </ul>
-   </div>  <section id="user_friends">
+   </div> 
+<section id="user_friends">
     <h4>Friends</h4>
     <%for (u of all_users){%>
                 <p>
@@ -100,6 +99,22 @@
 </section>
    
    
-    <a href="/signout">SIGN OUT</a>
+<a href="/signout">SIGN OUT</a>
+    <script>
+         <% if(flash.success&&flash.success.length>0){ %>
+             new Noty({
+               theme:'relax',
+    
+           
+               text: "<%=flash.success%>",
+               type:"success",
+               layout:"topRight",
+               timeout:1500 //this is in milliseconds
+
+            
+           
+               }).show();
+        <% } %>
+    </script>
 </body>
 </html>

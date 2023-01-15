@@ -1,13 +1,47 @@
+<html>
+    <head>
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
+    </head>
+    <body>
 <h1>
     Sign in
 </h1>
-<%if(flash.success&&flash.success.length>0){%>
-    <h5>
-        <%=flash.success%>
-    </h5>
-<%}%>
+
 <form action="/create-session" method="post">
     <input type="email" name="email" placeholder="email" required>
     <input type="password" name="password"  placeholder="password" required>
     <input type="submit" value="sign in">
 </form>
+<script>
+    <% if(flash.success&&flash.success.length>0){ %>
+        new Noty({
+          theme:'relax',
+
+      
+          text: "<%=flash.success%>",
+          type:"success",
+          layout:"topRight",
+          timeout:1500 //this is in milliseconds
+
+       
+      
+          }).show();
+   <% } %>
+   <% if(flash.error&&flash.error.length>0){ %>
+        new Noty({
+          theme:'relax',
+
+      
+          text: "<%=flash.error%>",
+          type:"success",
+          layout:"topRight",
+          timeout:1500 //this is in milliseconds
+
+       
+      
+          }).show();
+   <% } %>
+</script>
+    </body>
+</html>
