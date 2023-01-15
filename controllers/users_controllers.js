@@ -1,6 +1,7 @@
 const Us=require("../model/user");
 const Post=require('../model/post');
 const User = require("../model/user");
+const alert=require('alert');
 module.exports.signUp=function(req,res){
    // console.log(req.cookies);
    if(req.isAuthenticated()){
@@ -14,6 +15,7 @@ module.exports.signIn=function(req,res){
     if(req.isAuthenticated()){
        return res.redirect('/profile/');
        }
+   
    return res.render('user_sign_in',{
     title:"codeial|sign in"
    })
@@ -21,15 +23,13 @@ module.exports.signIn=function(req,res){
 //get the signup data
 
 module.exports.createSession=function(req,res){
+       req.flash("success","Logged in Successfully");
+
        return res.redirect('/profile/');
     }
 module.exports.profile=function(req,res){
     
-   // Post.find({},function(err,post){
-     //   return res.render('user_profile',{
-       //    posts:post
-        //});
-   //});
+  
    
    Post.find({})
    .populate('user')
@@ -57,6 +57,7 @@ module.exports.profile=function(req,res){
 module.exports.destroySession=function(req,res){
     req.logout(function(err){
         if(err){console.log('error in logging out');return res.redirect('signin');}
+        req.flash('success',"Logged out Successfully");
         res.redirect('signin');
     });
   

@@ -8,6 +8,9 @@ const passport=require('passport');
 const Localpassport=require('./config/passport-local-strategy');
 const app=express();
 const MongoStore=require('connect-mongo');
+const flash=require('connect-flash');
+const customMware=require('./config/middleware');
+const alert=require('alert');
 app.use(express.urlencoded());
 
 app.use(cookieParser());
@@ -36,6 +39,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(passport.setAuthenticatedUser);
+app.use(flash())//it has to  be written after session
+app.use(customMware.setFlash);
 app.use('/',require('./routes/users'));
 
 app.listen(port);

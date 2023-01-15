@@ -1,6 +1,11 @@
 <h1>
     Sign in
 </h1>
+<%if(flash.success&&flash.success.length>0){%>
+    <h5>
+        <%=flash.success%>
+    </h5>
+<%}%>
 <form action="/create-session" method="post">
     <input type="email" name="email" placeholder="email" required>
     <input type="password" name="password"  placeholder="password" required>
