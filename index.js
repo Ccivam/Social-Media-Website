@@ -12,10 +12,12 @@ const flash=require('connect-flash');
 const customMware=require('./config/middleware');
 const alert=require('alert');
 app.use(express.urlencoded());
-
 app.use(cookieParser());
+
 app.set('view engine','ejs');
+
 app.set('views','./views');
+app.use(express.static('assets'));
 
 //mongo store is use to store the session cookie in the db
 app.use(session({

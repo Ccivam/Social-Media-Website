@@ -32,6 +32,7 @@ module.exports.profile=function(req,res){
   
    
    Post.find({})
+   .sort('-createdAt')
    .populate('user')
    .populate({
       path:'comment',
