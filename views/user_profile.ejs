@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script><!--It should be below noty-->
+
     <title>Document</title>
 </head>
 <body>
@@ -39,11 +41,11 @@
     <div id="posts-list-container">
         <ul>
            <% for(post of posts){%>
-             <li>
+             <li id="post-<%=post._id%>">
                 <p>
                     <%if ((locals.user) && (locals.user.id==post.user.id)){%>
                     <small>
-                        <a href="/post/destroy/<%=post.id%>">DELETE</a><br>
+                        <a class="delete-post-button" href="/post/destroy/<%=post.id%>">DELETE</a><br>
                     </small>
                     <%}%>
                <%=post.content%><br>
@@ -98,10 +100,11 @@
 
 </section>
    
-   
+
 <a href="/signout">SIGN OUT</a>
     <script>
          <% if(flash.success&&flash.success.length>0){ %>
+
              new Noty({
                theme:'relax',
     
@@ -116,5 +119,6 @@
                }).show();
         <% } %>
     </script>
+<script src="/js/home_posts.js"></script>
 </body>
 </html>
