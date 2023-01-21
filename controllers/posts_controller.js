@@ -21,6 +21,7 @@ module.exports.create=async function(req,res){
           message:"Post created!"
         })
       }
+      res.redirect('back');
       
   }catch(err){
     console.log("error:",err);
@@ -47,7 +48,8 @@ module.exports.destroy=async function(req,res){
                         message:"Post deleted successfully"
                 });       
               }
-                     // return res.redirect('back');
+
+                     return res.redirect('back');
           }
     }catch(err){
         console.log("error:",err);

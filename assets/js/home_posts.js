@@ -1,3 +1,4 @@
+const { post } = require("../../routes/post");
 
 {
     //Method to submit the form data for new post using AJAX
@@ -73,5 +74,59 @@
         })
     
     }
+let createComment=function(){
+    let newCommentForm=$('#new-comment-form');
+    newCommentForm.submit(function(e){
+        e.preventDefault();
+        $.ajax({
+             type:'post',
+             url:'/comments/create',
+             data:newCommentForm.serialize(),
+             success:function(data){
+                   let newcomment=newcommentDom(data.comments);
+                   $('.post-comments-list').append(newcomment);
+                   deleteComment('#Delete-comment',newcomment);
+             },error:function(error){
+                console.log(error.responseText);
+             }
+
+        });
+
+    })
+}
+   let newcommentDom=function(comments){
+             return (` 
+             <ul id="post-comments-${comments.post}">
+             <li comment-${comments._id}>
+             <p>
+                 
+                     <small>
+                      <a id="Delete-comment" href="/comments/destroy/${comments._id}">DELETE</a>
+                     </small>
+                 <%}%>   
+              ${comments.content}
+ 
+              <br>
+              ${comments.user.name}
+             </p>
+             </li>
+             </ul>`)
+   }
+   let deleteComment=function(commentLink){
+    $(commentLink).click(function(e){
+             e.preventDefault();
+             $.ajax({
+                type:'get',
+                url:$(commentLink).prop('href'),
+                success:function(data){
+                    $(`comment-${data.comment_id}`).remove();
+                    
+                   },error:function(error){
+
+                  console.log(error.responseText);
+           }
+             })
+    });
+   }
 createPost();
 }

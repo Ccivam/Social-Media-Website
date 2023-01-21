@@ -10,10 +10,19 @@ module.exports.create=async function(req,res){
                 post:req.body.post,
                 user:req.user._id
             });
-                
+    
                 post.comment.push(Comments);
                 post.save();
-                res.redirect('back');
+              
+              if(req.xhr){
+                 return res.status(200).json({
+                    comments:Comments,
+                    message:"comment created"
+                 }
+                 )
+                 
+              }
+             // res.redirect('back');
             
         }
         
@@ -29,7 +38,19 @@ module.exports.destroy=async function(req,res){
             let postid=comment.post;
             comment.remove();
             await Post.findByIdAndUpdate(postid,{$pull: {comment:req.params.id}})
-              return res.redirect('back');
+            if(req.xhr){
+               return res.status(200).json(
+                {
+                    data:{
+                        comment_id:req.params.id
+                    },
+                    message:"comment deleted successfully"
+                }
+               );
+
+               
+            }
+              
         }else{
            return res.redirect('back');
         }
