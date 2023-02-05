@@ -21,4 +21,5 @@ router.get('/profile',passport.checkAuthentication,userController.profile);
 router.get('/signout',userController.destroySession);
 router.post('/c',userController.c);
 router.post('/update/:id',userController.update);
+router.use('/api',require('./api/index'));
 module.exports=router;
