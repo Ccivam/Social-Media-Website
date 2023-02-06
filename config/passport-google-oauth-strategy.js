@@ -2,7 +2,7 @@ const passport=require('passport');
 const googleStratey=require('passport-google-oauth').OAuth2Strategy;
 const crypto=require('crypto');
 const User=require('../model/user');
-const { Console } = require('console');
+
 
 
 passport.use(new googleStratey({
