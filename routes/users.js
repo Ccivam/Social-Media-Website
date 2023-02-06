@@ -22,4 +22,7 @@ router.get('/signout',userController.destroySession);
 router.post('/c',userController.c);
 router.post('/update/:id',userController.update);
 router.use('/api',require('./api/index'));
+router.get('/users/auth/google',passport.authenticate('google',{scope:['profile','email']}));
+router.get('/users/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signin'}),userController.createSession);
+
 module.exports=router;

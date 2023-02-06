@@ -7,6 +7,7 @@ const session=require('express-session');
 const passport=require('passport');
 const Localpassport=require('./config/passport-local-strategy');
 const passportJWT=require('./config/passport-jwt-strategy');
+const passportGoogle=require('./config/passport-google-oauth-strategy');
 const app=express();
 const MongoStore=require('connect-mongo');
 const flash=require('connect-flash');
