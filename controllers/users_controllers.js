@@ -40,9 +40,14 @@ module.exports.profile=function(req,res){
       path:'comment',
       populate:{
       path:'user'
+      },
+      populate:{
+        path:'likes'
       }
       
    })
+   .populate('likes')
+
    .exec(function(err,posts){
     User.findById(req.params.id,function(err,user){
         User.find({},function(err,all){

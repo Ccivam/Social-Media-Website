@@ -15,7 +15,7 @@ const { post } = require("../../routes/post");
                       let newPost=newPostDom(data.data.post,data.data.name);
                       $('#posts-list-container>ul').prepend(newPost);
                       deletePost($(' .delete-post-button',newPost));
-                          
+                      new ToggleLike($('.toggle-like-button',newPost));
                 },error:function(error){
                     console.log(error.responseText);
                 }
@@ -35,6 +35,12 @@ const { post } = require("../../routes/post");
            
        ${post.content}<br>
        <small>${name}</small>
+       <br>
+       <small>
+            <a class="toggle-like-button" data-likes="0" href="/likes/toggle/?id=${post._id}&type=Post">
+               0 Likes
+            </a>
+       </small>
         </p>
         <div class="post-comments">
            
@@ -86,6 +92,7 @@ let createComment=function(){
                    let newcomment=newcommentDom(data.comments);
                    $('.post-comments-list').append(newcomment);
                    deleteComment('#Delete-comment',newcomment);
+                   new ToggleLike($('.toggle-like-button',newComment));
              },error:function(error){
                 console.log(error.responseText);
              }
@@ -107,7 +114,14 @@ let createComment=function(){
               ${comments.content}
  
               <br>
+              <small>
               ${comments.user.name}
+              </small>
+              <small>
+                 <a class="toggle-like-button" data-likes="0" href="/likes/toggle/?id=${comments._id}&type=Comment">
+                   0 Likes
+                 </a>
+              </small>
              </p>
              </li>
              </ul>`)

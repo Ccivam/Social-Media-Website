@@ -54,6 +54,14 @@
                     <%}%>
                <%=post.content%><br>
                <small><%=post.user.name%></small>
+               <br>
+               <small>
+                <%if (locals.user){%>
+                    <a class="toggle-like-button" data-likes=" <%=post.likes.length %> " href="/likes/toggle/?id=<%=post._id%>&type=Post"><%=post.likes.length%>Likes</a>
+                <%}else{%>
+                    <%=post.likes.length%>Like
+                <%}%> 
+               </small>
                 </p>
                 <div class="post-comments">
                    <%if(locals.user){%>
@@ -70,7 +78,7 @@
                             <%for (comments of post.comment){%>
                                 <li id="comment-<%=comments._id%>">
                                 <p>
-                                    <%if (locals.user&&(locals.user.id==comments.user.id || locals.user.id==comments.post)){%>
+                                    <%if (locals.user&&(locals.user.id==comments.user.id || locals.user.id==comments.post.id)){%>
                                         <small>
                                         <a id="Delete-comment" href="/comments/destroy/<%=comments._id%>">DELETE</a>
                                         </small>
@@ -78,7 +86,16 @@
                                  <%=comments.content%>
 
                                  <br>
+                                 <small>
                                  <%=comments.user.name%>
+                                 </small>
+                                 <small>
+                                    <%if(locals.user){%>
+                                    <a data-likes="<%=comments.likes.length%>" class="toggle-like-button"  href="/likes/toggle/?id=<%=comments._id%>&type=Comment"> <%=comments.likes.length%>Likes </a>
+                                    <%}else{%>
+                                        <%=comment.likes.length%>Likes
+                                    <%}%>
+                                 </small>
                                 </p>
                                 </li>
                              <%}%>
@@ -124,5 +141,12 @@
         <% } %>
     </script>
 <script src="/js/home_posts.js"></script>
+<script src="/js/toggle_likes.js"></script>
+<script>
+    $('.toggle-like-button').each(function(){
+         let self=this;
+         let toggleLike=new ToggleLike(self);
+    });
+</script>
 </body>
 </html>
