@@ -1,4 +1,6 @@
 const express=require('express');
+const env=require('./config/environment');
+const logger=require('morgan');
 const port=8000;
 const cookieParser=require('cookie-parser');
 const db=require('./config/mongoose');
@@ -19,13 +21,14 @@ app.use(cookieParser());
 app.set('view engine','ejs');
 
 app.set('views','./views');
-app.use(express.static('assets'));
+app.use(express.static(env.asset_path));
 app.use('/uploads',express.static(__dirname+'/uploads'));
+app.use(logger(env.morgan.mode,env.morgan.options));
 //mongo store is use to store the session cookie in the db
 app.use(session({
     name:'codeial',
     //TODO change the secret before deployment in production mode
-    secret:'blahsomething',//key for encryption
+    secret:env.session_cookie_key,//key for encryption
     saveUninitialized:false,//
     resave:false,
     cookie:{
@@ -40,6 +43,7 @@ app.use(session({
    }
    )
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(passport.setAuthenticatedUser);

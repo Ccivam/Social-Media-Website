@@ -1,0 +1,11 @@
+[0mGET / [36m304[0m 95.936 ms - -[0m
+[0mGET /sign_up [36m304[0m 11.781 ms - -[0m
+[0mGET /users/auth/google [36m302[0m 16.678 ms - 0[0m
+[0mGET /users/auth/google/callback?code=4%2F0AWtgzh6vYbxV707amfRfeCJiujR9Xz3mP2bgF1jfic9qEgjU1Qsn1VZjCeV4X-CretW5FA&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=0&prompt=consent [36m302[0m 1025.310 ms - 62[0m
+[0mGET /profile/ [36m304[0m 34.891 ms - -[0m
+[0mPOST /likes/toggle/?id=64044f47b94701c96511e8d8&type=Post [32m200[0m 40.435 ms - 58[0m
+[0mPOST /comments/create [0m-[0m - ms - -[0m
+[0mGET /profile/ [32m200[0m 41.118 ms - 4368[0m
+[0mPOST /likes/toggle/?id=6404b8f91b78fb7b7862f890&type=Comment [32m200[0m 22.098 ms - 58[0m
+[0mGET /signout [36m302[0m 19.456 ms - 56[0m
+[0mGET /signin [32m200[0m 10.373 ms - 908[0m
