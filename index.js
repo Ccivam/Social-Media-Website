@@ -1,6 +1,7 @@
 const express=require('express');
 const env=require('./config/environment');
 const logger=require('morgan');
+
 const port=8000;
 const cookieParser=require('cookie-parser');
 const db=require('./config/mongoose');
@@ -11,6 +12,7 @@ const Localpassport=require('./config/passport-local-strategy');
 const passportJWT=require('./config/passport-jwt-strategy');
 const passportGoogle=require('./config/passport-google-oauth-strategy');
 const app=express();
+require('./config/view-helpers')(app);
 const MongoStore=require('connect-mongo');
 const flash=require('connect-flash');
 const customMware=require('./config/middleware');
@@ -24,6 +26,7 @@ app.set('views','./views');
 app.use(express.static(env.asset_path));
 app.use('/uploads',express.static(__dirname+'/uploads'));
 app.use(logger(env.morgan.mode,env.morgan.options));
+
 //mongo store is use to store the session cookie in the db
 app.use(session({
     name:'codeial',

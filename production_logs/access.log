@@ -9,3 +9,33 @@
 [0mPOST /likes/toggle/?id=6404b8f91b78fb7b7862f890&type=Comment [32m200[0m 22.098 ms - 58[0m
 [0mGET /signout [36m302[0m 19.456 ms - 56[0m
 [0mGET /signin [32m200[0m 10.373 ms - 908[0m
+::1 - - [05/Mar/2023:16:10:21 +0000] "GET / HTTP/1.1" 200 1206 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:23 +0000] "GET /sign_up HTTP/1.1" 304 - "http://localhost:8000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:44 +0000] "POST /c HTTP/1.1" 302 58 "http://localhost:8000/sign_up" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:44 +0000] "GET /signin HTTP/1.1" 200 655 "http://localhost:8000/sign_up" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:49 +0000] "POST /create-session HTTP/1.1" 302 62 "http://localhost:8000/signin" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:49 +0000] "GET /profile/ HTTP/1.1" 200 4623 "http://localhost:8000/signin" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:49 +0000] "GET /js/home_posts.js HTTP/1.1" 404 155 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:49 +0000] "GET /js/toggle_likes.js HTTP/1.1" 404 157 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:52 +0000] "GET /likes/toggle/?id=64044f47b94701c96511e8d8&type=Post HTTP/1.1" 404 152 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:55 +0000] "GET /likes/toggle/?id=6404b8f91b78fb7b7862f890&type=Comment HTTP/1.1" 404 152 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:10:58 +0000] "GET /likes/toggle/?id=64044f47b94701c96511e8d8&type=Post HTTP/1.1" 404 152 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:11:00 +0000] "GET /likes/toggle/?id=64044f47b94701c96511e8d8&type=Post HTTP/1.1" 404 152 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:11:27 +0000] "POST /post/create HTTP/1.1" 302 104 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:11:27 +0000] "GET /profile/ HTTP/1.1" 200 5802 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:11:27 +0000] "GET /js/home_posts.js HTTP/1.1" 404 155 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:11:27 +0000] "GET /js/toggle_likes.js HTTP/1.1" 404 157 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+::1 - - [05/Mar/2023:16:11:29 +0000] "GET /likes/toggle/?id=6404bf2f64479a923b5fe8ba&type=Post HTTP/1.1" 404 152 "http://localhost:8000/profile/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+[0mGET /profile/ [36m304[0m 112.377 ms - -[0m
+[0mPOST /likes/toggle/?id=6404bf2f64479a923b5fe8ba&type=Post [32m200[0m 45.977 ms - 58[0m
+[0mGET /post/destroy/6404bf2f64479a923b5fe8ba [36m302[0m 38.493 ms - 104[0m
+[0mGET /profile/ [32m200[0m 42.561 ms - 4310[0m
+[0mPOST /likes/toggle/?id=64044f47b94701c96511e8d8&type=Post [32m200[0m 30.325 ms - 58[0m
+[0mPOST /likes/toggle/?id=64044f47b94701c96511e8d8&type=Post [32m200[0m 20.907 ms - 57[0m
+[0mPOST /likes/toggle/?id=64044f47b94701c96511e8d8&type=Post [32m200[0m 26.278 ms - 58[0m
+[0mPOST /likes/toggle/?id=64044f47b94701c96511e8d8&type=Post [32m200[0m 20.233 ms - 57[0m
+[0mPOST /likes/toggle/?id=64044f47b94701c96511e8d8&type=Post [32m200[0m 23.118 ms - 58[0m
+[0mPOST /likes/toggle/?id=6404b8f91b78fb7b7862f890&type=Comment [32m200[0m 27.923 ms - 58[0m
+[0mPOST /likes/toggle/?id=6404b8f91b78fb7b7862f890&type=Comment [32m200[0m 18.629 ms - 57[0m
+[0mPOST /likes/toggle/?id=6404b8f91b78fb7b7862f890&type=Comment [32m200[0m 26.749 ms - 58[0m
+[0mGET /profile/ [32m200[0m 38.528 ms - 4310[0m
