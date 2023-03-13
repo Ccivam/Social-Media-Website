@@ -1,3 +1,14 @@
+.form-tag{
+    width:250px;
+    background-color:  rgba(0, 0, 255, 0.18);
+    border-radius: 50px;
+   
+    
+}
+.form-tag::placeholder{
+    color:black;
+}
+
 #Signin_page{
     border-radius: 50px;
     position: absolute;
@@ -5,6 +16,7 @@
     right: 38%;
     background-image: url("../img/bg1.png");
     width: 300px;
+    box-shadow: 10px 10px rgba(0, 0, 0, 0.127);
 }
 .input_form{
     margin:20px;
