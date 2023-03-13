@@ -407,3 +407,9 @@
 [0mGET /signin [36m304[0m 2.611 ms - -[0m
 =======
 >>>>>>> c37ce50cbe710a2ae585432b853c9e056f19459b
+[0mGET /signin [32m200[0m 17.573 ms - 726[0m
+[0mGET /signin [36m304[0m 4.732 ms - -[0m
+[0mGET /signin [36m304[0m 3.940 ms - -[0m
+[0mGET /sign_up [36m304[0m 3.066 ms - -[0m
+[0mGET /signin [36m304[0m 3.385 ms - -[0m
+[0mGET /signin [36m304[0m 2.712 ms - -[0m

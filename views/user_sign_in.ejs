@@ -5,21 +5,33 @@
          <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
     </head>
     <body>
-<h1>
-    Sign in
-</h1>
 
+<div id="Signin_page">
+    <h1 style="color:black; margin: 50px;">
+        Sign in
+    </h1>
 <form action="/create-session" method="post">
-    <input type="email" name="email" placeholder="email" required>
-    <input type="password" name="password"  placeholder="password" required>
-    <input type="submit" value="sign in">
+    <div class="input_form">
+    <input class="form-tag"  type="email" name="email" placeholder="email" required>
+    </div>
+    <div class="input_form">
+    <input type="password" class="form-tag" name="password"  placeholder="password" required>
+    </div>
+    <div class="input_form">
+    <input id="signin_button" class="form-tag" type="submit" value="sign in">
+    </div>
 </form>
-<p>
+<p class="google">
+    <a href="sign_up">Sign Up </a>
+</p>
+<p class="google">
     <a href="users/auth/google">
         Google Signin/Signup
 
     </a>
 </p>
+</div>
+
 <script>
     <% if(flash.success&&flash.success.length>0){ %>
         new Noty({
