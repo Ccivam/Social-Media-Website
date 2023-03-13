@@ -230,6 +230,7 @@
 [0mGET /signin [32m200[0m 3.944 ms - 1168[0m
 [0mGET /sign_up [36m304[0m 3.220 ms - -[0m
 [0mGET /signin [36m304[0m 4.037 ms - -[0m
+<<<<<<< HEAD
 [0mGET / [36m304[0m 51.583 ms - -[0m
 [0mGET / [36m304[0m 13.859 ms - -[0m
 [0mGET / [36m304[0m 12.986 ms - -[0m
@@ -404,3 +405,5 @@
 [0mGET /sign_up [36m304[0m 2.811 ms - -[0m
 [0mGET /signin [32m200[0m 3.191 ms - 1219[0m
 [0mGET /signin [36m304[0m 2.611 ms - -[0m
+=======
+>>>>>>> c37ce50cbe710a2ae585432b853c9e056f19459b
