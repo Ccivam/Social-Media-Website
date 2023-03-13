@@ -1,16 +1,43 @@
-<h1>
-    Sign up
-</h1>
-<form action="/c" method="post">
-    <input type="text" name="name" placeholder="name" required>
-    <input type="email" name="email" placeholder="email" required>
-    <input type="password" name="password" placeholder="password" required>
-    <input type="password" name="confirm_password" placeholder="confirm_password" required>
-    <button type="submit">sign up</button>
-</form>
-<p>
-    <a href="users/auth/google">
-        Google Signin/Signup
-
-    </a>
-</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css"  href="css/signup.css"> 
+    <title>SIGN UP</title>
+</head>
+<body>
+    <div id="Signup_page">
+    <h1 style="color:orange; margin: 50px;">
+        Sign up
+    </h1>
+    <form action="/c" method="post">
+        <div class="input_form" >
+        <input  type="text" name="name" placeholder="NAME" required><br>
+        </div>
+        <div class="input_form">
+        <input type="email" name="email" placeholder="EMAIL" required><br>
+        </div>
+        <div class="input_form">
+        <input type="password" name="password" placeholder="PASSWORD" required><br>
+        </div>
+        <div class="input_form">
+        <input type="password" name="confirm_password" placeholder="CONFIRM PASSWORD" required><br>
+        </div>
+        <div class="input_form" >
+        <button id="signup_button" type="submit">Sign up</button>
+        </div>
+    </form>
+    <p class="google">
+        <a href="signin">SIGN IN</a>
+    </p>
+    <p class="google">
+        <a  href="users/auth/google">
+            Google SignIn/SignUp
+    
+        </a>
+    </p>
+    </div>
+</body>
+</html>
