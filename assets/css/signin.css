@@ -1,7 +1,7 @@
-#Signup_page{
+#Signin_page{
     border-radius: 50px;
     position: absolute;
-    bottom: 10%;
+    bottom: 20%;
     right: 38%;
     background-image: url("../img/bg1.png");
     width: 300px;
@@ -31,12 +31,12 @@ a:hover{
     text-decoration: none;
 
 }
-#signup_button{
+#signin_button{
     background-color: rgba(0, 0, 255, 0.18);
     border: 0.1px black solid;
     border-radius: 10px;
 }
-#signup_button:hover{
+#signin_button:hover{
    color:white;
     
 }
