@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/profile.css" type="text/css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script><!--It should be below noty-->
@@ -11,16 +12,20 @@
     <title>Document</title>
 </head>
 <body>
-   
+<div id="whole-page">
+   <div id="user_information">
     <%if(profile_user){%>
-    <h2><%=profile_user.name%></h2>
-    <h2><%=profile_user.email%></h2>
+    
     <img src="<%=profile_user.avatar%>" alt="<%=profile_user.name%>" width="100">
+    <h4><%=profile_user.name%></h4>
     <%}else{%>
-        <h2><%=locals.user.name%></h2>
-        <h2><%=locals.user.email%></h2>
+        
+       
         <img src="<%=locals.user.avatar%>" alt="<%=locals.user.name%>" width="100">
+        <h2><%=locals.user.name%></h2>
     <%}%>
+   </div>
+   <div id="update-section">
     <%if(!profile_user){%>
         <p>UPDATE INFORMATION:</p>
         <form action="/update/<%=locals.user.id%>" method="post" enctype="multipart/form-data">
@@ -31,6 +36,8 @@
            
         </form>
     <%}%>
+   </div>
+   <div id="postion-section">
     <%if(!profile_user){%>
     <section>
         <h4>Posts</h4>
@@ -42,6 +49,8 @@
         </form>
     </section>
     <%}%>
+   </div>
+
     <div id="posts-list-container">
         <ul>
            <% for(post of posts){%>
@@ -93,8 +102,7 @@
                                     <%if(locals.user){%>
                                     <a data-likes="<%=comments.likes.length%>" class="toggle-like-button"  href="/likes/toggle/?id=<%=comments._id%>&type=Comment"> <%=comments.likes.length%>Likes </a>
                                     <%}else{%>
-                                        <%=comment.likes.length%>Likes
-                                    <%}%>
+                                        <%=comment.likes.length%>Likes                                    <%}%>
                                  </small>
                                 </p>
                                 </li>
@@ -148,5 +156,6 @@
          let toggleLike=new ToggleLike(self);
     });
 </script>
+    </div>
 </body>
 </html>

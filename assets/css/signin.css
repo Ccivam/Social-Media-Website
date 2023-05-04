@@ -10,11 +10,13 @@
 }
 #Signin_page{
     border-radius: 50px;
-    position: absolute;
-    bottom: 10%;
-    right: 38%;
+    position:absolute;
+    top:30%;
+    left:38%;
     background-image: url("../img/bg1.png");
-    width: 300px;
+   
+    
+    width: auto;
     box-shadow: 10px 10px rgba(0, 0, 0, 0.112);
 }
 .input_form{
@@ -26,6 +28,8 @@
 }
 body{
     background-image: url("../img/pngtree-abstract-glass-morphism-image_776730.jpg");
+   
+    
 }
 .google{
     text-align: center;
