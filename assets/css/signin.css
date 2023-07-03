@@ -1,5 +1,5 @@
 .form-tag{
-    width:250px;
+    width:300px;
     background-color:  rgba(0, 0, 255, 0.18);
     border-radius: 50px;
    
@@ -10,26 +10,28 @@
 }
 #Signin_page{
     border-radius: 50px;
+    border-width: 500px;
+    border-color: black;
     position:absolute;
     top:30%;
     left:38%;
-    background-image: url("../img/bg1.png");
-   
+   /* background-image: url("../img/bg1.png");*/
+    background-color: rgba(255, 255, 255, 0.24);
     
     width: auto;
-    box-shadow: 10px 10px rgba(0, 0, 0, 0.112);
+    box-shadow: 10px 10px rgba(0, 0, 0, 0.559);
 }
 .input_form{
     width: auto;
-    box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.112);
+    box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0);
     margin:20px;
     padding: 2px;
     border-radius: 10px;
 }
 body{
-    background-image: url("../img/pngtree-abstract-glass-morphism-image_776730.jpg");
+   /* background-image: url("../img/pngtree-abstract-glass-morphism-image_776730.jpg");*/
    
-    
+    background-color: rgba(240, 248, 255, 0.683);
 }
 .google{
     text-align: center;

@@ -130,3 +130,7 @@ module.exports.update=async function(req,res){
         return res.status(401).send("Unauthorized");
     }
 }
+
+module.exports.updateInformation=function(req,res){
+    res.render('update-information');
+}
