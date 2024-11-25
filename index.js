@@ -54,4 +54,5 @@ app.use(flash())//it has to  be written after session
 app.use(customMware.setFlash);
 app.use('/',require('./routes/users'));
 
+
 app.listen(port);
