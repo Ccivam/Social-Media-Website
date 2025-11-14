@@ -23,7 +23,7 @@ const MongoStore=require('connect-mongo');
 const flash=require('connect-flash');
 const customMware=require('./config/middleware');
 const alert=require('alert');
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.set('view engine','ejs');
