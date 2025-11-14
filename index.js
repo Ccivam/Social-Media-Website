@@ -44,7 +44,7 @@ app.use(session({
         maxAge:(1000*60*100)//It is in milliseconds
     },
    store:MongoStore.create({
-    mongoUrl:'mongodb://127.0.0.1/passportauthentication',
+    mongoUrl: process.env.MONGODB_URI || 'mongodb://127.0.0.1/passportauthentication',
     autoRemove:'disabled'
    },
    function(err){
