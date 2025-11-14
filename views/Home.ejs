@@ -106,6 +106,7 @@
         </div>
     </div>
 
+    <%if(locals.user){%>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // Notification badge update
@@ -131,13 +132,18 @@
         }
 
         // Real-time notification updates
-        const socket = io();
-        const userId = '<%= locals.user._id %>';
-        socket.emit('join', userId);
+        try {
+            const socket = io();
+            const userId = '<%= locals.user._id %>';
+            socket.emit('join', userId);
 
-        socket.on('new_notification', (notification) => {
-            updateNotificationBadge();
-        });
+            socket.on('new_notification', (notification) => {
+                updateNotificationBadge();
+            });
+        } catch(err) {
+            console.log('Socket connection error:', err);
+        }
     </script>
+    <%}%>
 </body>
 </html>
