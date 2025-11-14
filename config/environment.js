@@ -28,12 +28,12 @@ const development={
 const production={
     name:'production',
     asset_path:process.env.CODEIAL_ASSET_PATH,
-    session_cookie_key:process.env.session_cookie_key,
+    session_cookie_key:process.env.SESSION_COOKIE_KEY,
     db:process.env.codeial_db,
-    google_client_id:process.env.google_client_id,
-    google_client_secret:process.env.google_client_secret,
-    google_call_back_url:process.env.google_call_back_url,
-    jwt_key:process.env.jwt_key,
+    google_client_id:process.env.GOOGLE_CLIENT_ID,
+    google_client_secret:process.env.GOOGLE_CLIENT_SECRET,
+    google_call_back_url:process.env.GOOGLE_CALLBACK_URL,
+    jwt_key:process.env.jwt_key || 'codeial',
     morgan:{
         mode:'combined',
         options:{stream:accessLogStream}

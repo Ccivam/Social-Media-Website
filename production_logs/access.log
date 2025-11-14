@@ -387,3 +387,10 @@
 [0mGET /notifications [36m304[0m 8.451 ms - -[0m
 [0mGET /all-users [36m304[0m 8.345 ms - -[0m
 [0mGET /notifications/unread-count [36m304[0m 5.031 ms - -[0m
+[0mGET / [32m200[0m 338.995 ms - 14492[0m
+[0mGET /favicon.ico [33m404[0m 45.443 ms - 150[0m
+[0mGET /signin [32m200[0m 148.023 ms - 1731[0m
+[0mGET /users/auth/google [36m302[0m 170.027 ms - 0[0m
+[0mGET / [36m304[0m 279.649 ms - -[0m
+[0mGET /signin [36m304[0m 638.277 ms - -[0m
+[0mGET /users/auth/google [36m302[0m 146.873 ms - 0[0m
