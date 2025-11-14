@@ -35,7 +35,7 @@ app.use(logger(env.morgan.mode,env.morgan.options));
 
 //mongo store is use to store the session cookie in the db
 app.use(session({
-    name:'codeial',
+    name:'switter',
     //TODO change the secret before deployment in production mode
     secret:env.session_cookie_key,//key for encryption
     saveUninitialized:false,//
