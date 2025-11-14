@@ -4,157 +4,306 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/profile.css" type="text/css"> 
+    <link rel="stylesheet" href="/css/user_profile.css" type="text/css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script><!--It should be below noty-->
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <title>Profile - Codeial</title>
 </head>
 <body>
-<div id="whole-page">
-   <div id="user_information">
-    <%if(profile_user){%>
-    
-    <img src="<%=profile_user.avatar%>" alt="<%=profile_user.name%>" width="100">
-    <h4><%=profile_user.name%></h4>
-    <%}else{%>
-        
-       
-        <img src="<%=locals.user.avatar%>" alt="<%=locals.user.name%>" width="100">
-        <h2><%=locals.user.name%></h2>
-    <%}%>
-   </div>
-   <div id="update-section">
-    <%if(!profile_user){%>
-        
-        <a href="/update-Information" role="button" class="btn btn-primary" >Settings</a>
-       
-    <%}%>
-   </div>
-   <div id="postion-section">
-    <%if(!profile_user){%>
-    <section>
-        <h4>Posts</h4>
-        <form action="/post/create" id="new-post-form"  method="POST">
-            <textarea name="content" cols="30" rows="3" required></textarea><br>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">Codeial</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/all-users">All Users</a>
+                <a href="/chat">Chat</a>
+                <a href="/notifications" id="notifications-link">Notifications <span class="notif-badge" style="display:none;">0</span></a>
+                <a href="/profile/<%= locals.user._id %>" class="active">Profile</a>
+                <a href="/signout">Logout</a>
+            </div>
+        </div>
+    </nav>
 
-            <input type="submit" value="Post">
-            
-        </form>
-    </section>
-    <%}%>
-   </div>
-
-    <div id="posts-list-container">
-        <ul>
-           <% for(post of posts){%>
-             <li id="post-<%=post._id%>">
-                <p>
-                    <%if ((locals.user) && (locals.user.id==post.user.id)){%>
-                    <small>
-                        <a class="delete-post-button" href="/post/destroy/<%=post.id%>">DELETE</a><br>
-                    </small>
-                    <%}%>
-               <%=post.content%><br>
-               <small><%=post.user.name%></small>
-               <br>
-               <small>
-                <%if (locals.user){%>
-                    <a class="toggle-like-button" data-likes=" <%=post.likes.length %> " href="/likes/toggle/?id=<%=post._id%>&type=Post"><%=post.likes.length%>Likes</a>
-                <%}else{%>
-                    <%=post.likes.length%>Like
-                <%}%> 
-               </small>
-                </p>
-                <div class="post-comments">
-                   <%if(locals.user){%>
-                         <form action="/comments/create" method="post" id="new-comment-form">
-                            <input type="text" name="content" placeholder="Type here to add comments..." required>
-                            <input type="hidden" name="post" value="<%=post._id%>">
-                            <input type="submit" value="Add Comment">
-                         </form>
+    <div class="profile-container">
+        <div class="profile-sidebar">
+            <div class="profile-card">
+                <%if(profile_user){%>
+                    <div class="profile-avatar">
+                        <%if(profile_user.avatar){%>
+                            <img src="<%=profile_user.avatar%>" alt="<%=profile_user.name%>">
+                        <%}else{%>
+                            <div class="avatar-placeholder-large"><%=profile_user.name.charAt(0).toUpperCase()%></div>
+                        <%}%>
+                    </div>
+                    <h2><%=profile_user.name%></h2>
+                    <p class="profile-email"><%=profile_user.email%></p>
+                    
+                    <%if(locals.user && locals.user._id.toString() !== profile_user._id.toString()){%>
+                        <% 
+                            let isFriend = locals.user.friends && locals.user.friends.some(f => f._id.toString() === profile_user._id.toString());
+                            let requestSent = locals.user.sentRequests && locals.user.sentRequests.some(r => r._id.toString() === profile_user._id.toString());
+                            let requestReceived = locals.user.friendRequests && locals.user.friendRequests.some(r => r._id.toString() === profile_user._id.toString());
+                        %>
+                        <%if(isFriend){%>
+                            <span class="status-badge friends">Friends</span>
+                            <form action="/friends/remove-friend" method="POST">
+                                <input type="hidden" name="friendId" value="<%=profile_user._id%>">
+                                <button type="submit" class="btn btn-danger">Unfriend</button>
+                            </form>
+                        <%}else if(requestSent){%>
+                            <span class="status-badge pending">Request Sent</span>
+                        <%}else if(requestReceived){%>
+                            <form action="/friends/accept-request" method="POST">
+                                <input type="hidden" name="friendId" value="<%=profile_user._id%>">
+                                <button type="submit" class="btn btn-success">Accept Request</button>
+                            </form>
+                        <%}else{%>
+                            <form action="/friends/send-request" method="POST">
+                                <input type="hidden" name="friendId" value="<%=profile_user._id%>">
+                                <button type="submit" class="btn btn-primary">Add Friend</button>
+                            </form>
+                        <%}%>
                     <%}%>
                     
-                    <div class="post-comments-list">
-                        <ul id="post-comments-<%=post._id%>">
-                            
-                            <%for (comments of post.comment){%>
-                                <li id="comment-<%=comments._id%>">
-                                <p>
-                                    <%if (locals.user&&(locals.user.id==comments.user.id || locals.user.id==comments.post.id)){%>
-                                        <small>
-                                        <a id="Delete-comment" href="/comments/destroy/<%=comments._id%>">DELETE</a>
-                                        </small>
-                                    <%}%>   
-                                 <%=comments.content%>
-
-                                 <br>
-                                 <small>
-                                 <%=comments.user.name%>
-                                 </small>
-                                 <small>
-                                    <%if(locals.user){%>
-                                    <a data-likes="<%=comments.likes.length%>" class="toggle-like-button"  href="/likes/toggle/?id=<%=comments._id%>&type=Comment"> <%=comments.likes.length%>Likes </a>
-                                    <%}else{%>
-                                        <%=comment.likes.length%>Likes                                    <%}%>
-                                 </small>
-                                </p>
-                                </li>
-                             <%}%>
-                            
-                        </ul>
-
-                    </div>
-                </div>
-             </li>
-          
-           <%}%>
-        </ul>
-   </div> 
-<section id="user_friends">
-    <h4>Friends</h4>
-    <%for (u of all_users){%>
-                <p>
-                    <%if(locals.user.id!=u.id){%>
-                    <a href="/profile/<%=u.id%>"><%=u.name%></a>
+                    <%if(locals.user && locals.user._id.toString() === profile_user._id.toString()){%>
+                        <a href="/update-Information" class="btn btn-primary">Edit Profile</a>
                     <%}%>
-                </p>
-    <%}%>
+                <%}%>
+            </div>
 
-</section>
-   
+            <%if(locals.user && locals.user._id.toString() === profile_user._id.toString()){%>
+            <div class="twitter-section">
+                <h3>🐦 Twitter Integration</h3>
+                <div id="twitter-status">
+                    <%if(profile_user.twitter && profile_user.twitter.connected){%>
+                        <p class="twitter-connected">✓ Connected as @<%=profile_user.twitter.username%></p>
+                        <%if(profile_user.twitter.lastSync){%>
+                            <p class="last-sync">Last synced: <%=new Date(profile_user.twitter.lastSync).toLocaleString()%></p>
+                        <%}%>
+                        <button id="sync-tweets-btn" class="btn btn-primary">Sync Tweets</button>
+                        <form action="/twitter/disconnect" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger">Disconnect Twitter</button>
+                        </form>
+                    <%}else{%>
+                        <p class="twitter-disconnected">Twitter not connected</p>
+                        <a href="/twitter/connect" class="btn btn-primary">Connect Twitter</a>
+                        <div class="twitter-setup-info">
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                                ℹ️ Requires Twitter API credentials. 
+                                <a href="#" onclick="alert('1. Go to https://developer.twitter.com/\\n2. Create a Developer Account\\n3. Create a new App\\n4. Get API Key and Secret\\n5. Add to .env file:\\n   TWITTER_API_KEY=your_key\\n   TWITTER_API_SECRET=your_secret\\n6. Restart server'); return false;" style="color: #667eea;">Setup Guide</a>
+                            </p>
+                        </div>
+                    <%}%>
+                </div>
+                <div id="sync-status" style="margin-top:1rem;"></div>
+            </div>
+            <%}%>
 
-<a href="/signout">SIGN OUT</a>
+            <div class="friends-section">
+                <h3>Friends (<%=profile_user.friends ? profile_user.friends.length : 0%>)</h3>
+                <div class="friends-list-profile">
+                    <%if(profile_user.friends && profile_user.friends.length > 0){%>
+                        <%for(let friend of profile_user.friends){%>
+                            <a href="/profile/<%=friend._id%>" class="friend-item-small">
+                                <%if(friend.avatar){%>
+                                    <img src="<%=friend.avatar%>" alt="<%=friend.name%>">
+                                <%}else{%>
+                                    <div class="avatar-placeholder-tiny"><%=friend.name.charAt(0).toUpperCase()%></div>
+                                <%}%>
+                                <span><%=friend.name%></span>
+                            </a>
+                        <%}%>
+                    <%}else{%>
+                        <p class="no-friends-msg">No friends yet</p>
+                    <%}%>
+                </div>
+            </div>
+
+            <%if(locals.user && profile_user.friendRequests && profile_user.friendRequests.length > 0 && locals.user._id.toString() === profile_user._id.toString()){%>
+            <div class="requests-section">
+                <h3>Friend Requests</h3>
+                <%for(let request of profile_user.friendRequests){%>
+                    <div class="request-item">
+                        <a href="/profile/<%=request._id%>"><%=request.name%></a>
+                        <div class="request-actions">
+                            <form action="/friends/accept-request" method="POST" style="display:inline;">
+                                <input type="hidden" name="friendId" value="<%=request._id%>">
+                                <button type="submit" class="btn-small btn-success">Accept</button>
+                            </form>
+                            <form action="/friends/reject-request" method="POST" style="display:inline;">
+                                <input type="hidden" name="friendId" value="<%=request._id%>">
+                                <button type="submit" class="btn-small btn-danger">Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                <%}%>
+            </div>
+            <%}%>
+        </div>
+
+        <div class="profile-main">
+            <%if(locals.user && (!profile_user || locals.user._id.toString() === profile_user._id.toString())){%>
+            <div class="create-post-section">
+                <h3>Create Post</h3>
+                <form action="/post/create" id="new-post-form" method="POST">
+                    <textarea name="content" placeholder="What's on your mind?" required></textarea>
+                    <button type="submit" class="btn btn-primary">Post</button>
+                </form>
+            </div>
+            <%}%>
+
+            <div class="posts-section">
+                <h3>Posts</h3>
+                <%if(posts.length === 0){%>
+                    <p class="no-posts">No posts yet</p>
+                <%}else{%>
+                    <%for(let post of posts){%>
+                    <div class="post-card" id="post-<%=post._id%>">
+                        <div class="post-header">
+                            <div class="post-author">
+                                <div class="author-avatar-small">
+                                    <%if(post.user.avatar){%>
+                                        <img src="<%=post.user.avatar%>" alt="<%=post.user.name%>">
+                                    <%}else{%>
+                                        <div class="avatar-placeholder-small"><%=post.user.name.charAt(0).toUpperCase()%></div>
+                                    <%}%>
+                                </div>
+                                <div>
+                                    <h4><%=post.user.name%></h4>
+                                    <span class="post-time"><%=new Date(post.createdAt).toLocaleDateString()%></span>
+                                </div>
+                            </div>
+                            <%if(locals.user && locals.user._id.toString() === post.user._id.toString()){%>
+                                <a class="delete-post-button" href="/post/destroy/<%=post._id%>">Delete</a>
+                            <%}%>
+                        </div>
+                        <div class="post-content">
+                            <p><%=post.content%></p>
+                        </div>
+                        <div class="post-actions">
+                            <%if(locals.user){%>
+                                <a class="toggle-like-button" data-likes="<%=post.likes.length%>" href="/likes/toggle/?id=<%=post._id%>&type=Post">
+                                    <%=post.likes.length%> Likes
+                                </a>
+                            <%}else{%>
+                                <span><%=post.likes.length%> Likes</span>
+                            <%}%>
+                        </div>
+                        <div class="post-comments">
+                            <%if(locals.user){%>
+                            <form action="/comments/create" method="post" class="comment-form">
+                                <input type="text" name="content" placeholder="Write a comment..." required>
+                                <input type="hidden" name="post" value="<%=post._id%>">
+                                <button type="submit">Comment</button>
+                            </form>
+                            <%}%>
+                            <div class="comments-list">
+                                <%if(post.comment && post.comment.length > 0){%>
+                                    <%for(let comment of post.comment){%>
+                                        <%if(comment.user){%>
+                                        <div class="comment-item" id="comment-<%=comment._id%>">
+                                            <div class="comment-content">
+                                                <strong><%=comment.user.name || 'Unknown User'%></strong>
+                                                <p><%=comment.content%></p>
+                                                <%if(locals.user){%>
+                                                    <a class="toggle-like-button" data-likes="<%=comment.likes.length%>" href="/likes/toggle/?id=<%=comment._id%>&type=Comment">
+                                                        <%=comment.likes.length%> Likes
+                                                    </a>
+                                                <%}%>
+                                                <%if(locals.user && (locals.user._id.toString() === comment.user._id.toString() || locals.user._id.toString() === post.user._id.toString())){%>
+                                                    <a href="/comments/destroy/<%=comment._id%>" class="delete-comment">Delete</a>
+                                                <%}%>
+                                            </div>
+                                        </div>
+                                        <%}%>
+                                    <%}%>
+                                <%}%>
+                            </div>
+                        </div>
+                    </div>
+                    <%}%>
+                <%}%>
+            </div>
+        </div>
+    </div>
+
     <script>
-         <% if(flash.success&&flash.success.length>0){ %>
-
-             new Noty({
-               theme:'relax',
-    
-           
-               text: "<%=flash.success%>",
-               type:"success",
-               layout:"topRight",
-               timeout:1500 //this is in milliseconds
-
-            
-           
-               }).show();
+        <% if(flash.success && flash.success.length > 0){ %>
+            new Noty({
+                theme: 'relax',
+                text: "<%=flash.success%>",
+                type: "success",
+                layout: "topRight",
+                timeout: 1500
+            }).show();
+        <% } %>
+        <% if(flash.error && flash.error.length > 0){ %>
+            new Noty({
+                theme: 'relax',
+                text: "<%=flash.error%>",
+                type: "error",
+                layout: "topRight",
+                timeout: 1500
+            }).show();
         <% } %>
     </script>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<script src="/js/home_posts.js"></script>
-<script src="/js/toggle_likes.js"></script>
+    <script src="/js/home_posts.js"></script>
+    <script src="/js/toggle_likes.js"></script>
+    <script>
+        $('.toggle-like-button').each(function(){
+            let self = this;
+            let toggleLike = new ToggleLike(self);
+        });
 
-<script>
-    $('.toggle-like-button').each(function(){
-         let self=this;
-         let toggleLike=new ToggleLike(self);
-    });
-</script>
-    </div>
+        // Notification badge
+        async function updateNotificationBadge() {
+            try {
+                const response = await fetch('/notifications/unread-count');
+                const data = await response.json();
+                if(data.success && data.data.count > 0) {
+                    const badge = document.querySelector('.notif-badge');
+                    if(badge) {
+                        badge.textContent = data.data.count;
+                        badge.style.display = 'inline';
+                    }
+                }
+            } catch(err) {}
+        }
+        if(document.querySelector('#notifications-link')) {
+            updateNotificationBadge();
+        }
+
+        // Twitter sync
+        const syncBtn = document.getElementById('sync-tweets-btn');
+        if(syncBtn) {
+            syncBtn.addEventListener('click', async () => {
+                syncBtn.disabled = true;
+                syncBtn.textContent = 'Syncing...';
+                const statusDiv = document.getElementById('sync-status');
+                
+                try {
+                    const response = await fetch('/twitter/sync', {
+                        method: 'POST'
+                    });
+                    const data = await response.json();
+                    
+                    if(data.success) {
+                        statusDiv.innerHTML = `<p style="color: green;">✓ ${data.message}</p>`;
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        statusDiv.innerHTML = `<p style="color: red;">✗ ${data.message}</p>`;
+                        syncBtn.disabled = false;
+                        syncBtn.textContent = 'Sync Tweets';
+                    }
+                } catch(err) {
+                    statusDiv.innerHTML = '<p style="color: red;">✗ Error syncing tweets</p>';
+                    syncBtn.disabled = false;
+                    syncBtn.textContent = 'Sync Tweets';
+                }
+            });
+        }
+    </script>
 </body>
 </html>

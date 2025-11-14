@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/notifications.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">Codeial</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/all-users">All Users</a>
+                <a href="/chat">Chat</a>
+                <a href="/notifications" class="active">
+                    Notifications
+                    <% if(unreadCount > 0) { %>
+                        <span class="badge"><%= unreadCount %></span>
+                    <% } %>
+                </a>
+                <a href="/profile/<%= locals.user._id %>">Profile</a>
+                <a href="/signout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="notifications-header">
+            <h1>Notifications</h1>
+            <% if(unreadCount > 0) { %>
+                <button id="mark-all-read" class="btn btn-primary">Mark All as Read</button>
+            <% } %>
+        </div>
+
+        <div class="notifications-list">
+            <% if(notifications.length === 0) { %>
+                <div class="no-notifications">
+                    <p>No notifications yet</p>
+                </div>
+            <% } else { %>
+                <% for(let notification of notifications) { %>
+                    <div class="notification-item <%= notification.read ? 'read' : 'unread' %>" data-id="<%= notification._id %>">
+                        <div class="notification-avatar">
+                            <% if(notification.sender.avatar) { %>
+                                <img src="<%= notification.sender.avatar %>" alt="<%= notification.sender.name %>">
+                            <% } else { %>
+                                <div class="avatar-placeholder"><%= notification.sender.name.charAt(0).toUpperCase() %></div>
+                            <% } %>
+                        </div>
+                        <div class="notification-content">
+                            <p><%= notification.content %></p>
+                            <span class="notification-time"><%= new Date(notification.createdAt).toLocaleString() %></span>
+                        </div>
+                        <div class="notification-actions">
+                            <% if(notification.link) { %>
+                                <a href="<%= notification.link %>" class="btn-view">View</a>
+                            <% } %>
+                            <% if(!notification.read) { %>
+                                <button class="btn-mark-read" data-id="<%= notification._id %>">✓</button>
+                            <% } %>
+                            <button class="btn-delete" data-id="<%= notification._id %>">×</button>
+                        </div>
+                    </div>
+                <% } %>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const userId = '<%= locals.user._id %>';
+        socket.emit('join', userId);
+
+        // Listen for new notifications
+        socket.on('new_notification', (notification) => {
+            // Add notification to top of list
+            const notificationsList = document.querySelector('.notifications-list');
+            const noNotifications = notificationsList.querySelector('.no-notifications');
+            if(noNotifications) noNotifications.remove();
+
+            const notificationHTML = createNotificationHTML(notification);
+            notificationsList.insertAdjacentHTML('afterbegin', notificationHTML);
+
+            // Update badge
+            updateBadge();
+        });
+
+        function createNotificationHTML(notification) {
+            const avatar = notification.sender.avatar 
+                ? `<img src="${notification.sender.avatar}" alt="${notification.sender.name}">`
+                : `<div class="avatar-placeholder">${notification.sender.name.charAt(0).toUpperCase()}</div>`;
+
+            return `
+                <div class="notification-item unread" data-id="${notification._id}">
+                    <div class="notification-avatar">${avatar}</div>
+                    <div class="notification-content">
+                        <p>${notification.content}</p>
+                        <span class="notification-time">${new Date(notification.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div class="notification-actions">
+                        ${notification.link ? `<a href="${notification.link}" class="btn-view">View</a>` : ''}
+                        <button class="btn-mark-read" data-id="${notification._id}">✓</button>
+                        <button class="btn-delete" data-id="${notification._id}">×</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mark as read
+        document.addEventListener('click', async (e) => {
+            if(e.target.classList.contains('btn-mark-read')) {
+                const id = e.target.dataset.id;
+                try {
+                    const response = await fetch(`/notifications/mark-read/${id}`, {
+                        method: 'POST'
+                    });
+                    if(response.ok) {
+                        const item = document.querySelector(`.notification-item[data-id="${id}"]`);
+                        item.classList.remove('unread');
+                        item.classList.add('read');
+                        e.target.remove();
+                        updateBadge();
+                    }
+                } catch(err) {
+                    console.log('Error marking as read:', err);
+                }
+            }
+
+            if(e.target.classList.contains('btn-delete')) {
+                const id = e.target.dataset.id;
+                try {
+                    const response = await fetch(`/notifications/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if(response.ok) {
+                        const item = document.querySelector(`.notification-item[data-id="${id}"]`);
+                        item.remove();
+                        updateBadge();
+                        
+                        // Check if no notifications left
+                        const items = document.querySelectorAll('.notification-item');
+                        if(items.length === 0) {
+                            document.querySelector('.notifications-list').innerHTML = 
+                                '<div class="no-notifications"><p>No notifications yet</p></div>';
+                        }
+                    }
+                } catch(err) {
+                    console.log('Error deleting notification:', err);
+                }
+            }
+        });
+
+        // Mark all as read
+        const markAllBtn = document.getElementById('mark-all-read');
+        if(markAllBtn) {
+            markAllBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/notifications/mark-all-read', {
+                        method: 'POST'
+                    });
+                    if(response.ok) {
+                        document.querySelectorAll('.notification-item').forEach(item => {
+                            item.classList.remove('unread');
+                            item.classList.add('read');
+                            const btn = item.querySelector('.btn-mark-read');
+                            if(btn) btn.remove();
+                        });
+                        markAllBtn.remove();
+                        updateBadge();
+                    }
+                } catch(err) {
+                    console.log('Error marking all as read:', err);
+                }
+            });
+        }
+
+        function updateBadge() {
+            const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+            const badge = document.querySelector('.nav-links .badge');
+            if(unreadCount > 0) {
+                if(badge) {
+                    badge.textContent = unreadCount;
+                } else {
+                    const notifLink = document.querySelector('.nav-links a[href="/notifications"]');
+                    notifLink.innerHTML += `<span class="badge">${unreadCount}</span>`;
+                }
+            } else if(badge) {
+                badge.remove();
+            }
+        }
+    </script>
+</body>
+</html>

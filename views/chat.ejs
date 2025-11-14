@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/chat.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">Codeial</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/all-users">All Users</a>
+                <a href="/chat" class="active">Chat</a>
+                <a href="/notifications" id="notifications-link">Notifications <span class="notif-badge" style="display:none;">0</span></a>
+                <a href="/profile/<%= locals.user._id %>">Profile</a>
+                <a href="/signout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="chat-container">
+        <div class="friends-sidebar">
+            <h2>Friends</h2>
+            <div class="friends-list">
+                <% if(friends.length === 0) { %>
+                    <p class="no-friends">No friends yet. <a href="/all-users">Find friends</a></p>
+                <% } else { %>
+                    <% for(let friend of friends) { %>
+                        <div class="friend-item" data-friend-id="<%= friend._id %>" data-friend-name="<%= friend.name %>">
+                            <div class="friend-avatar">
+                                <% if(friend.avatar) { %>
+                                    <img src="<%= friend.avatar %>" alt="<%= friend.name %>">
+                                <% } else { %>
+                                    <div class="avatar-placeholder"><%= friend.name.charAt(0).toUpperCase() %></div>
+                                <% } %>
+                            </div>
+                            <div class="friend-info">
+                                <h4><%= friend.name %></h4>
+                            </div>
+                        </div>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="chat-header">
+                <h3 id="chat-friend-name">Select a friend to start chatting</h3>
+            </div>
+            <div class="messages-container" id="messages-container">
+                <p class="select-friend-msg">Select a friend from the left to start chatting</p>
+            </div>
+            <div class="message-input-container" id="message-input-container" style="display:none;">
+                <input type="text" id="message-input" placeholder="Type a message...">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const userId = '<%= locals.user._id %>';
+        let currentFriendId = null;
+        let currentFriendName = null;
+
+        socket.emit('join', userId);
+
+        // Notification badge
+        async function updateNotificationBadge() {
+            try {
+                const response = await fetch('/notifications/unread-count');
+                const data = await response.json();
+                if(data.success && data.data.count > 0) {
+                    const badge = document.querySelector('.notif-badge');
+                    if(badge) {
+                        badge.textContent = data.data.count;
+                        badge.style.display = 'inline';
+                    }
+                }
+            } catch(err) {}
+        }
+        updateNotificationBadge();
+
+        // Friend selection
+        document.querySelectorAll('.friend-item').forEach(item => {
+            item.addEventListener('click', function() {
+                currentFriendId = this.dataset.friendId;
+                currentFriendName = this.dataset.friendName;
+                
+                document.querySelectorAll('.friend-item').forEach(f => f.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.getElementById('chat-friend-name').textContent = currentFriendName;
+                document.getElementById('message-input-container').style.display = 'flex';
+                
+                loadChatHistory(currentFriendId);
+            });
+        });
+
+        // Load chat history
+        async function loadChatHistory(friendId) {
+            try {
+                const response = await fetch(`/chat/history/${friendId}`);
+                const data = await response.json();
+                
+                const container = document.getElementById('messages-container');
+                container.innerHTML = '';
+                
+                if(data.success && data.data.messages.length > 0) {
+                    data.data.messages.forEach(msg => {
+                        displayMessage(msg);
+                    });
+                } else {
+                    container.innerHTML = '<p class="no-messages">No messages yet. Start the conversation!</p>';
+                }
+                
+                scrollToBottom();
+            } catch(err) {
+                console.log('Error loading chat history:', err);
+            }
+        }
+
+        // Send message
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') sendMessage();
+        });
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if(message && currentFriendId) {
+                socket.emit('send_message', {
+                    senderId: userId,
+                    receiverId: currentFriendId,
+                    message: message
+                });
+                
+                input.value = '';
+            }
+        }
+
+        // Receive messages
+        socket.on('receive_message', (data) => {
+            if(data.sender._id === currentFriendId) {
+                displayMessage(data);
+                scrollToBottom();
+            }
+        });
+
+        socket.on('message_sent', (data) => {
+            if(data.receiver._id === currentFriendId || data.receiver === currentFriendId) {
+                displayMessage(data);
+                scrollToBottom();
+            }
+        });
+
+        function displayMessage(msg) {
+            const container = document.getElementById('messages-container');
+            const noMsg = container.querySelector('.no-messages, .select-friend-msg');
+            if(noMsg) noMsg.remove();
+            
+            const isSender = msg.sender._id === userId || msg.sender === userId;
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSender ? 'sent' : 'received'}`;
+            
+            const senderName = isSender ? 'You' : (msg.sender.name || currentFriendName);
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <p>${msg.message}</p>
+                    <span class="message-time">${new Date(msg.createdAt).toLocaleTimeString()}</span>
+                </div>
+            `;
+            
+            container.appendChild(messageDiv);
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('messages-container');
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>

@@ -4,56 +4,140 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Codeial - Home</title>
+    <link rel="stylesheet" href="/css/home.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>home</h1>
-    <a href="/sign_up"><h3>Sign Up</h3></a><br>
-    <a href="/signin"><h3>Sign in</h3></a>
-    <%if(locals.user){%>
-    <section>
-        <h4>Posts</h4>
-        <form action="/post/create" id="new-post-form" method="POST">
-        <textarea name="content" cols="30" rows="3" required></textarea><br>
-        <input type="submit" value="Post">
-        </form>
-    </section>
-    <%}%>
-    <h4>POSTS</h4>
-    <div id="posts-list-container">
-        <ul>
-           <% for(post of posts){%>
-             <li>
-                <p>
-               <%=post.content%><br>
-             <small>Posted by</small><br><small><%=post.user.name%></small>
-                </p>
-                <div class="post-comments">
-                  <%if (locals.user){%>
-                       <form action="/comments/create" method="post">
-                          <input type="text" name="content" placeholder="Type here to add comments...">
-                          <input type="hidden" name="post" value="<%=post._id%>">
-                          <input type="submit" value="Add Comment">
-                       </form>
-                  <%}%>
-                  
-                  <div class="post-comments-list">
-                      <ul id="post-comments-<%=post._id%>">
-                          <%for (comments of post.comment){%>
-                              <p>
-                               <%=comments.content%>
-                               <br>
-                               <%=comments.user.name%>
-                              </p>
-                           <%}%>   
-                      </ul>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">Codeial</a>
+            <%if(locals.user){%>
+            <div class="nav-links">
+                <a href="/" class="active">Home</a>
+                <a href="/all-users">All Users</a>
+                <a href="/chat">Chat</a>
+                <a href="/notifications" id="notifications-link">Notifications <span class="notif-badge" style="display:none;">0</span></a>
+                <a href="/profile/<%= locals.user._id %>">Profile</a>
+                <a href="/signout">Logout</a>
+            </div>
+            <%} else {%>
+            <div class="nav-links">
+                <a href="/signin">Sign In</a>
+                <a href="/sign_up">Sign Up</a>
+            </div>
+            <%}%>
+        </div>
+    </nav>
 
-                  </div>
-              </div>
-             </li>
-           <%}%>
-        </ul>
-   </div>
-  
+    <div class="container">
+        <%if(locals.user){%>
+        <div class="create-post-card">
+            <h2>What's on your mind?</h2>
+            <form action="/post/create" id="new-post-form" method="POST">
+                <textarea name="content" placeholder="Share your thoughts..." required></textarea>
+                <button type="submit" class="btn-post">Post</button>
+            </form>
+        </div>
+        <%}%>
+
+        <div class="posts-section">
+            <h2>Recent Posts</h2>
+            <div id="posts-list-container">
+                <% if(posts.length === 0) { %>
+                    <p class="no-posts">No posts yet. Be the first to post!</p>
+                <% } else { %>
+                    <% for(post of posts){%>
+                    <div class="post-card">
+                        <div class="post-header">
+                            <div class="post-author">
+                                <div class="author-avatar">
+                                    <% if(post.user.avatar) { %>
+                                        <img src="<%= post.user.avatar %>" alt="<%= post.user.name %>">
+                                    <% } else { %>
+                                        <div class="avatar-placeholder"><%= post.user.name.charAt(0).toUpperCase() %></div>
+                                    <% } %>
+                                </div>
+                                <div class="author-info">
+                                    <h4><%= post.user.name %></h4>
+                                    <span class="post-time"><%= new Date(post.createdAt).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <p><%= post.content %></p>
+                        </div>
+                        <div class="post-comments">
+                            <%if (locals.user){%>
+                            <form action="/comments/create" method="post" class="comment-form">
+                                <input type="text" name="content" placeholder="Write a comment...">
+                                <input type="hidden" name="post" value="<%=post._id%>">
+                                <button type="submit">Comment</button>
+                            </form>
+                            <%}%>
+                            
+                            <div class="comments-list">
+                                <%if(post.comment && post.comment.length > 0){%>
+                                    <h5>Comments</h5>
+                                    <%for (comments of post.comment){%>
+                                        <%if(comments.user){%>
+                                        <div class="comment-item">
+                                            <div class="comment-avatar">
+                                                <% if(comments.user.avatar) { %>
+                                                    <img src="<%= comments.user.avatar %>" alt="<%= comments.user.name %>">
+                                                <% } else { %>
+                                                    <div class="avatar-placeholder-small"><%= comments.user.name ? comments.user.name.charAt(0).toUpperCase() : 'U' %></div>
+                                                <% } %>
+                                            </div>
+                                            <div class="comment-content">
+                                                <strong><%= comments.user.name || 'Unknown User' %></strong>
+                                                <p><%= comments.content %></p>
+                                            </div>
+                                        </div>
+                                        <%}%>
+                                    <%}%>
+                                <%}%>
+                            </div>
+                        </div>
+                    </div>
+                    <%}%>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Notification badge update
+        async function updateNotificationBadge() {
+            try {
+                const response = await fetch('/notifications/unread-count');
+                const data = await response.json();
+                if(data.success && data.data.count > 0) {
+                    const badge = document.querySelector('.notif-badge');
+                    if(badge) {
+                        badge.textContent = data.data.count;
+                        badge.style.display = 'inline';
+                    }
+                }
+            } catch(err) {
+                console.log('Error getting notification count:', err);
+            }
+        }
+
+        if(document.querySelector('#notifications-link')) {
+            updateNotificationBadge();
+            setInterval(updateNotificationBadge, 30000);
+        }
+
+        // Real-time notification updates
+        const socket = io();
+        const userId = '<%= locals.user._id %>';
+        socket.emit('join', userId);
+
+        socket.on('new_notification', (notification) => {
+            updateNotificationBadge();
+        });
+    </script>
 </body>
 </html>

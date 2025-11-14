@@ -4,16 +4,14 @@ const like=require('../model/like');
 module.exports.home=async function(req,res){
     try{
         let post=await Post.find({})
+        .sort('-createdAt')
         .populate('user')
         .populate({
            path:'comment',
-           populate:{
-           path:'user'
-           },
-           populate:{
-            path:'likes'
-           }
-           
+           populate:[
+               {path:'user'},
+               {path:'likes'}
+           ]
         })
         .populate('likes');
         let users=await User.find({});

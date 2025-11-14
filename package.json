@@ -16,6 +16,7 @@
     "connect-mongo": "^4.6.0",
     "cookie-parser": "^1.4.6",
     "crypto": "^1.0.1",
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.8",
     "express": "^4.19.2",
     "express-session": "^1.17.3",
@@ -33,7 +34,9 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "process": "^0.11.10",
-    "rotating-file-stream": "^3.1.0"
+    "rotating-file-stream": "^3.1.0",
+    "socket.io": "^4.8.1",
+    "twitter-api-v2": "^1.27.0"
   },
   "devDependencies": {
     "gulp": "^5.0.0"

@@ -29,38 +29,37 @@ module.exports.createSession=function(req,res){
 
        return res.redirect('/profile/');
     }
-module.exports.profile=function(req,res){
-    
-  
-   
-   Post.find({})
-   .sort('-createdAt')
-   .populate('user')
-   .populate({
-      path:'comment',
-      populate:{
-      path:'user'
-      },
-      populate:{
-        path:'likes'
-      }
-      
-   })
-   .populate('likes')
+module.exports.profile=async function(req,res){
+    try{
+        const posts = await Post.find({})
+            .sort('-createdAt')
+            .populate('user')
+            .populate({
+                path:'comment',
+                populate:[
+                    {path:'user'},
+                    {path:'likes'}
+                ]
+            })
+            .populate('likes');
 
-   .exec(function(err,posts){
-    User.findById(req.params.id,function(err,user){
-        User.find({},function(err,all){
+        const profileUserId = req.params.id || req.user._id;
+        const profileUser = await User.findById(profileUserId)
+            .populate('friends', 'name avatar email')
+            .populate('friendRequests', 'name avatar email')
+            .populate('sentRequests', 'name avatar email');
+
+        const allUsers = await User.find({});
+
         return res.render('user_profile',{
             posts:posts,
-            profile_user:user,
-            all_users:all
-        })
-    });
-    });
-    
-   })
-
+            profile_user:profileUser,
+            all_users:allUsers
+        });
+    }catch(err){
+        console.log('Error loading profile:', err);
+        return res.redirect('back');
+    }
 }
 
 module.exports.destroySession=function(req,res){

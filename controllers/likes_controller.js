@@ -1,6 +1,8 @@
 const like=require('../model/like');
 const Comment=require('../model/comment');
 const Post=require('../model/post');
+const User=require('../model/user');
+const { createNotification } = require('./notifications_controller');
 
 module.exports.toggleLike=async function(req,res){
     try{
@@ -9,11 +11,11 @@ module.exports.toggleLike=async function(req,res){
         let deleted=false;
         
         if(req.query.type=="Post"){
-           likeable=await Post.findById(req.query.id).populate('likes');
+           likeable=await Post.findById(req.query.id).populate('likes').populate('user');
            
          
         }else{
-             likeable=await Comment.findById(req.query.id).populate('likes');
+             likeable=await Comment.findById(req.query.id).populate('likes').populate('user');
         }
         //check if like already exists
          let existingLike=await like.findOne({
@@ -41,6 +43,20 @@ module.exports.toggleLike=async function(req,res){
            });
            likeable.likes.push(newLike._id);
            likeable.save();
+
+           // Create notification (if not liking own content)
+           if(likeable.user && likeable.user._id.toString() !== req.user._id.toString()) {
+               const contentType = req.query.type === 'Post' ? 'post' : 'comment';
+               await createNotification(
+                   likeable.user._id,
+                   req.user._id,
+                   'like',
+                   `${req.user.name} liked your ${contentType}`,
+                   `/profile/${likeable.user._id}`,
+                   req.query.type === 'Post' ? req.query.id : null,
+                   req.query.type === 'Comment' ? req.query.id : null
+               );
+           }
          }
           return res.status(200).json({
             message:"Request successful!",

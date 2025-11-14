@@ -24,7 +24,17 @@ const postSchema=new mongoose.Schema(
                 type:mongoose.Schema.Types.ObjectId,
                 ref:'Like'
             }
-        ]
+        ],
+        twitterId: {
+            type: String
+        },
+        importedFromTwitter: {
+            type: Boolean,
+            default: false
+        },
+        twitterCreatedAt: {
+            type: Date
+        }
     },{
         timestamps:true
     }

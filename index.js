@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express=require('express');
 const env=require('./config/environment');
 const logger=require('morgan');
@@ -12,6 +14,10 @@ const Localpassport=require('./config/passport-local-strategy');
 const passportJWT=require('./config/passport-jwt-strategy');
 const passportGoogle=require('./config/passport-google-oauth-strategy');
 const app=express();
+const http=require('http');
+const server=http.createServer(app);
+const io=require('socket.io')(server);
+const Chat=require('./model/chat');
 require('./config/view-helpers')(app);
 const MongoStore=require('connect-mongo');
 const flash=require('connect-flash');
@@ -54,5 +60,55 @@ app.use(flash())//it has to  be written after session
 app.use(customMware.setFlash);
 app.use('/',require('./routes/users'));
 
+// Socket.io for real-time chat and notifications
+const Notification = require('./model/notification');
+const notificationsController = require('./controllers/notifications_controller');
 
-app.listen(port);
+io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+
+    socket.on('join', (userId) => {
+        socket.join(userId);
+        console.log('User joined room:', userId);
+    });
+
+    socket.on('send_message', async (data) => {
+        try {
+            const chat = await Chat.create({
+                sender: data.senderId,
+                receiver: data.receiverId,
+                message: data.message
+            });
+
+            const populatedChat = await Chat.findById(chat._id).populate('sender receiver', 'name avatar');
+            
+            io.to(data.receiverId).emit('receive_message', populatedChat);
+            io.to(data.senderId).emit('message_sent', populatedChat);
+
+            // Create notification for message
+            const sender = await require('./model/user').findById(data.senderId);
+            const notification = await notificationsController.createNotification(
+                data.receiverId,
+                data.senderId,
+                'message',
+                `${sender.name} sent you a message`,
+                '/chat'
+            );
+
+            if(notification) {
+                const populatedNotification = await Notification.findById(notification._id).populate('sender', 'name avatar');
+                io.to(data.receiverId).emit('new_notification', populatedNotification);
+            }
+        } catch (err) {
+            console.log('Error sending message:', err);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
+
+server.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});

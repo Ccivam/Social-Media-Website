@@ -20,6 +20,47 @@ const userSchema=new mongoose.Schema({
     avatar:{
         type:String,
 
+    },
+    friends:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+    }],
+    friendRequests:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+    }],
+    sentRequests:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+    }],
+    twitter: {
+        connected: {
+            type: Boolean,
+            default: false
+        },
+        username: String,
+        accessToken: String,
+        accessTokenSecret: String,
+        userId: String,
+        lastSync: Date
+    },
+    notificationSettings: {
+        friendRequests: {
+            type: Boolean,
+            default: true
+        },
+        comments: {
+            type: Boolean,
+            default: true
+        },
+        likes: {
+            type: Boolean,
+            default: true
+        },
+        messages: {
+            type: Boolean,
+            default: true
+        }
     }
 },{
         timestamps:true

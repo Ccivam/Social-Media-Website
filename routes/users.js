@@ -13,7 +13,12 @@ router.get('/signin',userController.signIn);
 router.use('/post',require('./post'));
 router.use('/comments',require('./comments'));
 router.use('/likes',require('./likes'));
+router.use('/friends',require('./friends'));
+router.use('/chat',require('./chat'));
+router.use('/notifications',require('./notifications'));
+router.use('/twitter',require('./twitter'));
 router.get('/update-Information',userController.updateInformation);
+router.get('/all-users',passport.checkAuthentication,require('../controllers/all_users_controller').allUsers);
 //use passport as a middleware 
 router.post('/create-session',passport.authenticate(
    'local',
