@@ -132,6 +132,7 @@
         }
 
         // Real-time notification updates
+        <% if(locals.user && locals.user._id) { %>
         try {
             const socket = io();
             const userId = '<%= locals.user._id %>';
@@ -143,6 +144,7 @@
         } catch(err) {
             console.log('Socket connection error:', err);
         }
+        <% } %>
     </script>
     <%}%>
 </body>
