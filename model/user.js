@@ -69,11 +69,11 @@ const userSchema=new mongoose.Schema({
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
       console.log(AVATAR_PATH);
-      cb(null, path.join(__dirname+'..'+AVATAR_PATH));
+      cb(null, path.join(__dirname, '..', AVATAR_PATH));
     },
     filename: function (req, file, cb) {
-      
-      cb(null, file.fieldname + '-' + Date.now())
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
   });
 //static functions

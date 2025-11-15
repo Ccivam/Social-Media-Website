@@ -2,232 +2,324 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/user_profile.css" type="text/css"> 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <title>Profile - Switter</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-container">
-            <a href="/" class="logo">Switter</a>
-            <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="/all-users">All Users</a>
-                <a href="/chat">Chat</a>
-                <a href="/notifications" id="notifications-link">Notifications <span class="notif-badge" style="display:none;">0</span></a>
-                <a href="/profile/<%= locals.user._id %>" class="active">Profile</a>
-                <a href="/signout">Logout</a>
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Switter</a>
+            <div class="navbar-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/all-users" class="nav-link">Users</a>
+                <a href="/chat" class="nav-link">Chat</a>
+                <a href="/social-graph" class="nav-link">Graph</a>
+                <a href="/notifications" class="nav-link">Notifications</a>
+                <a href="/profile/<%= locals.user._id %>" class="nav-link active">Profile</a>
+                <a href="/signout" class="btn btn-ghost btn-sm">Logout</a>
             </div>
         </div>
     </nav>
 
-    <div class="profile-container">
-        <div class="profile-sidebar">
-            <div class="profile-card">
-                <%if(profile_user){%>
-                    <div class="profile-avatar">
-                        <%if(profile_user.avatar){%>
-                            <img src="<%=profile_user.avatar%>" alt="<%=profile_user.name%>">
-                        <%}else{%>
-                            <div class="avatar-placeholder-large"><%=profile_user.name.charAt(0).toUpperCase()%></div>
-                        <%}%>
-                    </div>
-                    <h2><%=profile_user.name%></h2>
-                    <p class="profile-email"><%=profile_user.email%></p>
-                    
-                    <%if(locals.user && locals.user._id.toString() !== profile_user._id.toString()){%>
-                        <% 
-                            let isFriend = locals.user.friends && locals.user.friends.some(f => f._id.toString() === profile_user._id.toString());
-                            let requestSent = locals.user.sentRequests && locals.user.sentRequests.some(r => r._id.toString() === profile_user._id.toString());
-                            let requestReceived = locals.user.friendRequests && locals.user.friendRequests.some(r => r._id.toString() === profile_user._id.toString());
-                        %>
-                        <%if(isFriend){%>
-                            <span class="status-badge friends">Friends</span>
-                            <form action="/friends/remove-friend" method="POST">
-                                <input type="hidden" name="friendId" value="<%=profile_user._id%>">
-                                <button type="submit" class="btn btn-danger">Unfriend</button>
-                            </form>
-                        <%}else if(requestSent){%>
-                            <span class="status-badge pending">Request Sent</span>
-                        <%}else if(requestReceived){%>
-                            <form action="/friends/accept-request" method="POST">
-                                <input type="hidden" name="friendId" value="<%=profile_user._id%>">
-                                <button type="submit" class="btn btn-success">Accept Request</button>
-                            </form>
-                        <%}else{%>
-                            <form action="/friends/send-request" method="POST">
-                                <input type="hidden" name="friendId" value="<%=profile_user._id%>">
-                                <button type="submit" class="btn btn-primary">Add Friend</button>
-                            </form>
-                        <%}%>
-                    <%}%>
-                    
-                    <%if(locals.user && locals.user._id.toString() === profile_user._id.toString()){%>
-                        <a href="/update-Information" class="btn btn-primary">Edit Profile</a>
-                    <%}%>
-                <%}%>
-            </div>
-
-            <%if(locals.user && locals.user._id.toString() === profile_user._id.toString()){%>
-            <div class="twitter-section">
-                <h3>🐦 Twitter Integration</h3>
-                <div id="twitter-status">
-                    <%if(profile_user.twitter && profile_user.twitter.connected){%>
-                        <p class="twitter-connected">✓ Connected as @<%=profile_user.twitter.username%></p>
-                        <%if(profile_user.twitter.lastSync){%>
-                            <p class="last-sync">Last synced: <%=new Date(profile_user.twitter.lastSync).toLocaleString()%></p>
-                        <%}%>
-                        <button id="sync-tweets-btn" class="btn btn-primary">Sync Tweets</button>
-                        <form action="/twitter/disconnect" method="POST" style="display:inline;">
-                            <button type="submit" class="btn btn-danger">Disconnect Twitter</button>
-                        </form>
-                    <%}else{%>
-                        <p class="twitter-disconnected">Twitter not connected</p>
-                        <a href="/twitter/connect" class="btn btn-primary">Connect Twitter</a>
-                        <div class="twitter-setup-info">
-                            <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
-                                ℹ️ Requires Twitter API credentials. 
-                                <a href="#" onclick="alert('1. Go to https://developer.twitter.com/\\n2. Create a Developer Account\\n3. Create a new App\\n4. Get API Key and Secret\\n5. Add to .env file:\\n   TWITTER_API_KEY=your_key\\n   TWITTER_API_SECRET=your_secret\\n6. Restart server'); return false;" style="color: #667eea;">Setup Guide</a>
-                            </p>
-                        </div>
-                    <%}%>
-                </div>
-                <div id="sync-status" style="margin-top:1rem;"></div>
-            </div>
-            <%}%>
-
-            <div class="friends-section">
-                <h3>Friends (<%=profile_user.friends ? profile_user.friends.length : 0%>)</h3>
-                <div class="friends-list-profile">
-                    <%if(profile_user.friends && profile_user.friends.length > 0){%>
-                        <%for(let friend of profile_user.friends){%>
-                            <a href="/profile/<%=friend._id%>" class="friend-item-small">
-                                <%if(friend.avatar){%>
-                                    <img src="<%=friend.avatar%>" alt="<%=friend.name%>">
+    <main class="container py-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Sidebar -->
+                <div class="flex flex-col gap-6">
+                    <!-- Profile Card -->
+                    <div class="card">
+                        <div class="card-content py-6 flex flex-col items-center text-center gap-4">
+                            <div class="avatar avatar-xl">
+                                <%if(profile_user.avatar){%>
+                                    <img src="<%=profile_user.avatar%>" alt="<%=profile_user.name%>" class="avatar-image">
                                 <%}else{%>
-                                    <div class="avatar-placeholder-tiny"><%=friend.name.charAt(0).toUpperCase()%></div>
+                                    <div class="avatar-fallback text-2xl"><%=profile_user.name.charAt(0).toUpperCase()%></div>
                                 <%}%>
-                                <span><%=friend.name%></span>
-                            </a>
-                        <%}%>
-                    <%}else{%>
-                        <p class="no-friends-msg">No friends yet</p>
-                    <%}%>
-                </div>
-            </div>
-
-            <%if(locals.user && profile_user.friendRequests && profile_user.friendRequests.length > 0 && locals.user._id.toString() === profile_user._id.toString()){%>
-            <div class="requests-section">
-                <h3>Friend Requests</h3>
-                <%for(let request of profile_user.friendRequests){%>
-                    <div class="request-item">
-                        <a href="/profile/<%=request._id%>"><%=request.name%></a>
-                        <div class="request-actions">
-                            <form action="/friends/accept-request" method="POST" style="display:inline;">
-                                <input type="hidden" name="friendId" value="<%=request._id%>">
-                                <button type="submit" class="btn-small btn-success">Accept</button>
-                            </form>
-                            <form action="/friends/reject-request" method="POST" style="display:inline;">
-                                <input type="hidden" name="friendId" value="<%=request._id%>">
-                                <button type="submit" class="btn-small btn-danger">Reject</button>
-                            </form>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold"><%=profile_user.name%></h2>
+                                <p class="text-sm text-muted"><%=profile_user.email%></p>
+                            </div>
+                            
+                            <%if(locals.user && locals.user._id.toString() !== profile_user._id.toString()){%>
+                                <% 
+                                    let isFriend = locals.user.friends && locals.user.friends.some(f => f._id.toString() === profile_user._id.toString());
+                                    let requestSent = locals.user.sentRequests && locals.user.sentRequests.some(r => r._id.toString() === profile_user._id.toString());
+                                    let requestReceived = locals.user.friendRequests && locals.user.friendRequests.some(r => r._id.toString() === profile_user._id.toString());
+                                %>
+                                <%if(isFriend){%>
+                                    <div class="flex flex-col gap-2 w-full">
+                                        <span class="badge badge-default">Friends</span>
+                                        <form action="/friends/remove-friend" method="POST">
+                                            <input type="hidden" name="friendId" value="<%=profile_user._id%>">
+                                            <button type="submit" class="btn btn-destructive w-full">Unfriend</button>
+                                        </form>
+                                    </div>
+                                <%}else if(requestSent){%>
+                                    <span class="badge badge-secondary">Request Sent</span>
+                                <%}else if(requestReceived){%>
+                                    <form action="/friends/accept-request" method="POST" class="w-full">
+                                        <input type="hidden" name="friendId" value="<%=profile_user._id%>">
+                                        <button type="submit" class="btn btn-primary w-full">Accept Request</button>
+                                    </form>
+                                <%}else{%>
+                                    <form action="/friends/send-request" method="POST" class="w-full">
+                                        <input type="hidden" name="friendId" value="<%=profile_user._id%>">
+                                        <button type="submit" class="btn btn-primary w-full">Add Friend</button>
+                                    </form>
+                                <%}%>
+                            <%}%>
+                            
+                            <%if(locals.user && locals.user._id.toString() === profile_user._id.toString()){%>
+                                <div class="flex flex-col gap-2 w-full">
+                                    <a href="/update-Information" class="btn btn-outline w-full">Edit Profile</a>
+                                    <a href="/social-graph" class="btn btn-secondary w-full">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <circle cx="12" cy="12" r="4"></circle>
+                                            <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+                                            <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+                                        </svg>
+                                        Social Graph
+                                    </a>
+                                </div>
+                            <%}%>
                         </div>
                     </div>
-                <%}%>
-            </div>
-            <%}%>
-        </div>
 
-        <div class="profile-main">
-            <%if(locals.user && (!profile_user || locals.user._id.toString() === profile_user._id.toString())){%>
-            <div class="create-post-section">
-                <h3>Create Post</h3>
-                <form action="/post/create" id="new-post-form" method="POST">
-                    <textarea name="content" placeholder="What's on your mind?" required></textarea>
-                    <button type="submit" class="btn btn-primary">Post</button>
-                </form>
-            </div>
-            <%}%>
-
-            <div class="posts-section">
-                <h3>Posts</h3>
-                <%if(posts.length === 0){%>
-                    <p class="no-posts">No posts yet</p>
-                <%}else{%>
-                    <%for(let post of posts){%>
-                    <div class="post-card" id="post-<%=post._id%>">
-                        <div class="post-header">
-                            <div class="post-author">
-                                <div class="author-avatar-small">
-                                    <%if(post.user.avatar){%>
-                                        <img src="<%=post.user.avatar%>" alt="<%=post.user.name%>">
-                                    <%}else{%>
-                                        <div class="avatar-placeholder-small"><%=post.user.name.charAt(0).toUpperCase()%></div>
-                                    <%}%>
-                                </div>
-                                <div>
-                                    <h4><%=post.user.name%></h4>
-                                    <span class="post-time"><%=new Date(post.createdAt).toLocaleDateString()%></span>
-                                </div>
-                            </div>
-                            <%if(locals.user && locals.user._id.toString() === post.user._id.toString()){%>
-                                <a class="delete-post-button" href="/post/destroy/<%=post._id%>">Delete</a>
-                            <%}%>
+                    <!-- Friends Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Friends</h3>
+                            <p class="card-description"><%=profile_user.friends ? profile_user.friends.length : 0%> friends</p>
                         </div>
-                        <div class="post-content">
-                            <p><%=post.content%></p>
-                        </div>
-                        <div class="post-actions">
-                            <%if(locals.user){%>
-                                <a class="toggle-like-button" data-likes="<%=post.likes.length%>" href="/likes/toggle/?id=<%=post._id%>&type=Post">
-                                    <%=post.likes.length%> Likes
-                                </a>
-                            <%}else{%>
-                                <span><%=post.likes.length%> Likes</span>
-                            <%}%>
-                        </div>
-                        <div class="post-comments">
-                            <%if(locals.user){%>
-                            <form action="/comments/create" method="post" class="comment-form">
-                                <input type="text" name="content" placeholder="Write a comment..." required>
-                                <input type="hidden" name="post" value="<%=post._id%>">
-                                <button type="submit">Comment</button>
-                            </form>
-                            <%}%>
-                            <div class="comments-list">
-                                <%if(post.comment && post.comment.length > 0){%>
-                                    <%for(let comment of post.comment){%>
-                                        <%if(comment.user){%>
-                                        <div class="comment-item" id="comment-<%=comment._id%>">
-                                            <div class="comment-content">
-                                                <strong><%=comment.user.name || 'Unknown User'%></strong>
-                                                <p><%=comment.content%></p>
-                                                <%if(locals.user){%>
-                                                    <a class="toggle-like-button" data-likes="<%=comment.likes.length%>" href="/likes/toggle/?id=<%=comment._id%>&type=Comment">
-                                                        <%=comment.likes.length%> Likes
-                                                    </a>
-                                                <%}%>
-                                                <%if(locals.user && (locals.user._id.toString() === comment.user._id.toString() || locals.user._id.toString() === post.user._id.toString())){%>
-                                                    <a href="/comments/destroy/<%=comment._id%>" class="delete-comment">Delete</a>
+                        <div class="card-content">
+                            <%if(profile_user.friends && profile_user.friends.length > 0){%>
+                                <div class="flex flex-col gap-2">
+                                    <%for(let friend of profile_user.friends.slice(0, 5)){%>
+                                        <a href="/profile/<%=friend._id%>" class="flex items-center gap-3 p-2 rounded hover:bg-accent">
+                                            <div class="avatar avatar-sm">
+                                                <%if(friend.avatar){%>
+                                                    <img src="<%=friend.avatar%>" alt="<%=friend.name%>" class="avatar-image">
+                                                <%}else{%>
+                                                    <div class="avatar-fallback"><%=friend.name.charAt(0).toUpperCase()%></div>
                                                 <%}%>
                                             </div>
-                                        </div>
-                                        <%}%>
+                                            <span class="text-sm font-medium"><%=friend.name%></span>
+                                        </a>
                                     <%}%>
+                                    <%if(profile_user.friends.length > 5){%>
+                                        <p class="text-sm text-muted text-center">+<%=profile_user.friends.length - 5%> more</p>
+                                    <%}%>
+                                </div>
+                            <%}else{%>
+                                <p class="text-sm text-muted text-center py-4">No friends yet</p>
+                            <%}%>
+                        </div>
+                    </div>
+
+                    <!-- Friend Requests -->
+                    <%if(locals.user && profile_user.friendRequests && profile_user.friendRequests.length > 0 && locals.user._id.toString() === profile_user._id.toString()){%>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Friend Requests</h3>
+                            <p class="card-description"><%=profile_user.friendRequests.length%> pending</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="flex flex-col gap-3">
+                                <%for(let request of profile_user.friendRequests){%>
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar avatar-sm">
+                                            <%if(request.avatar){%>
+                                                <img src="<%=request.avatar%>" alt="<%=request.name%>" class="avatar-image">
+                                            <%}else{%>
+                                                <div class="avatar-fallback"><%=request.name.charAt(0).toUpperCase()%></div>
+                                            <%}%>
+                                        </div>
+                                        <div class="flex-1">
+                                            <a href="/profile/<%=request._id%>" class="text-sm font-medium hover:underline"><%=request.name%></a>
+                                        </div>
+                                        <div class="flex gap-1">
+                                            <form action="/friends/accept-request" method="POST" style="display:inline;">
+                                                <input type="hidden" name="friendId" value="<%=request._id%>">
+                                                <button type="submit" class="btn btn-primary btn-sm">Accept</button>
+                                            </form>
+                                            <form action="/friends/reject-request" method="POST" style="display:inline;">
+                                                <input type="hidden" name="friendId" value="<%=request._id%>">
+                                                <button type="submit" class="btn btn-ghost btn-sm">Reject</button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 <%}%>
                             </div>
                         </div>
                     </div>
                     <%}%>
-                <%}%>
+
+                    <!-- Twitter Integration -->
+                    <%if(locals.user && locals.user._id.toString() === profile_user._id.toString()){%>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Twitter Sync</h3>
+                            <p class="card-description">Import your tweets as posts</p>
+                        </div>
+                        <div class="card-content">
+                            <%if(profile_user.twitter && profile_user.twitter.connected){%>
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex items-center gap-3 p-3 rounded" style="background-color: hsl(var(--muted));">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: #1DA1F2;">
+                                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                                        </svg>
+                                        <div class="flex-1">
+                                            <p class="font-medium">Connected as @<%=profile_user.twitter.username%></p>
+                                            <%if(profile_user.twitter.lastSync){%>
+                                                <p class="text-sm text-muted">Last synced: <%=new Date(profile_user.twitter.lastSync).toLocaleDateString()%></p>
+                                            <%}%>
+                                        </div>
+                                    </div>
+
+                                    <button id="sync-tweets-btn" class="btn btn-primary w-full">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="23 4 23 10 17 10"></polyline>
+                                            <polyline points="1 20 1 14 7 14"></polyline>
+                                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                        </svg>
+                                        Sync Tweets
+                                    </button>
+
+                                    <form action="/twitter/disconnect" method="POST">
+                                        <button type="submit" class="btn btn-outline w-full">Disconnect Twitter</button>
+                                    </form>
+
+                                    <div id="sync-status"></div>
+                                </div>
+                            <%}else{%>
+                                <div class="flex flex-col gap-4">
+                                    <p class="text-sm text-muted">Connect your Twitter account to import your tweets as posts on Switter.</p>
+                                    <a href="/twitter/connect" class="btn btn-primary w-full">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                                        </svg>
+                                        Connect Twitter
+                                    </a>
+                                </div>
+                            <%}%>
+                        </div>
+                    </div>
+                    <%}%>
+                </div>
+
+                <!-- Main Content -->
+                <div class="lg:col-span-2 flex flex-col gap-6">
+                    <%if(locals.user && (!profile_user || locals.user._id.toString() === profile_user._id.toString())){%>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Create Post</h3>
+                        </div>
+                        <div class="card-content">
+                            <form action="/post/create" id="new-post-form" method="POST" class="flex flex-col gap-4">
+                                <textarea name="content" class="textarea" placeholder="What's on your mind?" required rows="3"></textarea>
+                                <button type="submit" class="btn btn-primary">Post</button>
+                            </form>
+                        </div>
+                    </div>
+                    <%}%>
+
+                    <div class="flex flex-col gap-4">
+                        <h3 class="text-xl font-semibold">Posts</h3>
+                        <%if(posts.length === 0){%>
+                            <div class="card">
+                                <div class="card-content py-12 text-center">
+                                    <p class="text-muted">No posts yet</p>
+                                </div>
+                            </div>
+                        <%}else{%>
+                            <%for(let post of posts){%>
+                            <div class="card hover-lift">
+                                <div class="card-header">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="avatar">
+                                                <%if(post.user.avatar){%>
+                                                    <img src="<%=post.user.avatar%>" alt="<%=post.user.name%>" class="avatar-image">
+                                                <%}else{%>
+                                                    <div class="avatar-fallback"><%=post.user.name.charAt(0).toUpperCase()%></div>
+                                                <%}%>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold"><%=post.user.name%></h4>
+                                                <p class="text-sm text-muted"><%=new Date(post.createdAt).toLocaleDateString()%></p>
+                                            </div>
+                                        </div>
+                                        <%if(locals.user && locals.user._id.toString() === post.user._id.toString()){%>
+                                            <a href="/post/destroy/<%=post._id%>" class="btn btn-ghost btn-sm">Delete</a>
+                                        <%}%>
+                                    </div>
+                                </div>
+                                <div class="card-content">
+                                    <p><%=post.content%></p>
+                                </div>
+                                <div class="card-footer">
+                                    <%if(locals.user){%>
+                                        <a class="toggle-like-button btn btn-ghost btn-sm" data-likes="<%=post.likes.length%>" href="/likes/toggle/?id=<%=post._id%>&type=Post">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                            </svg>
+                                            <span><%=post.likes.length%></span>
+                                        </a>
+                                    <%}else{%>
+                                        <span class="text-sm text-muted"><%=post.likes.length%> likes</span>
+                                    <%}%>
+                                </div>
+                                <div class="separator"></div>
+                                <div class="card-content">
+                                    <%if(locals.user){%>
+                                    <form action="/comments/create" method="post" class="flex gap-2 mb-4">
+                                        <input type="text" name="content" class="input" placeholder="Write a comment..." required>
+                                        <input type="hidden" name="post" value="<%=post._id%>">
+                                        <button type="submit" class="btn btn-primary btn-sm">Comment</button>
+                                    </form>
+                                    <%}%>
+                                    <%if(post.comment && post.comment.length > 0){%>
+                                        <div class="flex flex-col gap-3">
+                                            <%for(let comment of post.comment){%>
+                                                <%if(comment.user){%>
+                                                <div class="flex gap-3">
+                                                    <div class="avatar avatar-sm">
+                                                        <%if(comment.user.avatar){%>
+                                                            <img src="<%=comment.user.avatar%>" alt="<%=comment.user.name%>" class="avatar-image">
+                                                        <%}else{%>
+                                                            <div class="avatar-fallback"><%=comment.user.name.charAt(0).toUpperCase()%></div>
+                                                        <%}%>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <div class="card">
+                                                            <div class="card-content p-3">
+                                                                <p class="font-semibold text-sm"><%=comment.user.name || 'Unknown User'%></p>
+                                                                <p class="text-sm"><%=comment.content%></p>
+                                                            </div>
+                                                        </div>
+                                                        <%if(locals.user && (locals.user._id.toString() === comment.user._id.toString() || locals.user._id.toString() === post.user._id.toString())){%>
+                                                            <a href="/comments/destroy/<%=comment._id%>" class="text-sm text-muted hover:text-foreground">Delete</a>
+                                                        <%}%>
+                                                    </div>
+                                                </div>
+                                                <%}%>
+                                            <%}%>
+                                        </div>
+                                    <%}%>
+                                </div>
+                            </div>
+                            <%}%>
+                        <%}%>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
         <% if(flash.success && flash.success.length > 0){ %>
@@ -248,39 +340,29 @@
                 timeout: 1500
             }).show();
         <% } %>
-    </script>
-    <script src="/js/home_posts.js"></script>
-    <script src="/js/toggle_likes.js"></script>
-    <script>
-        $('.toggle-like-button').each(function(){
-            let self = this;
-            let toggleLike = new ToggleLike(self);
+
+        document.querySelectorAll('.toggle-like-button').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const url = button.getAttribute('href');
+                try {
+                    const response = await fetch(url, { method: 'POST' });
+                    const data = await response.json();
+                    if(data.success) {
+                        button.querySelector('span').textContent = data.data.likes;
+                    }
+                } catch(err) {
+                    console.error('Error:', err);
+                }
+            });
         });
 
-        // Notification badge
-        async function updateNotificationBadge() {
-            try {
-                const response = await fetch('/notifications/unread-count');
-                const data = await response.json();
-                if(data.success && data.data.count > 0) {
-                    const badge = document.querySelector('.notif-badge');
-                    if(badge) {
-                        badge.textContent = data.data.count;
-                        badge.style.display = 'inline';
-                    }
-                }
-            } catch(err) {}
-        }
-        if(document.querySelector('#notifications-link')) {
-            updateNotificationBadge();
-        }
-
-        // Twitter sync
+        // Twitter sync functionality
         const syncBtn = document.getElementById('sync-tweets-btn');
         if(syncBtn) {
             syncBtn.addEventListener('click', async () => {
                 syncBtn.disabled = true;
-                syncBtn.textContent = 'Syncing...';
+                syncBtn.innerHTML = '<span class="spinner"></span> Syncing...';
                 const statusDiv = document.getElementById('sync-status');
                 
                 try {
@@ -290,17 +372,17 @@
                     const data = await response.json();
                     
                     if(data.success) {
-                        statusDiv.innerHTML = `<p style="color: green;">✓ ${data.message}</p>`;
+                        statusDiv.innerHTML = '<div class="p-3 rounded" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981;"><p class="text-sm font-medium">✓ ' + data.message + '</p></div>';
                         setTimeout(() => location.reload(), 2000);
                     } else {
-                        statusDiv.innerHTML = `<p style="color: red;">✗ ${data.message}</p>`;
+                        statusDiv.innerHTML = '<div class="p-3 rounded" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444;"><p class="text-sm font-medium">✗ ' + data.message + '</p></div>';
                         syncBtn.disabled = false;
-                        syncBtn.textContent = 'Sync Tweets';
+                        syncBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Sync Tweets';
                     }
                 } catch(err) {
-                    statusDiv.innerHTML = '<p style="color: red;">✗ Error syncing tweets</p>';
+                    statusDiv.innerHTML = '<div class="p-3 rounded" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444;"><p class="text-sm font-medium">✗ Error syncing tweets</p></div>';
                     syncBtn.disabled = false;
-                    syncBtn.textContent = 'Sync Tweets';
+                    syncBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Sync Tweets';
                 }
             });
         }

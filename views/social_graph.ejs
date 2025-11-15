@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Graph - Switter</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js"></script>
+    <style>
+        #network-graph {
+            width: 100%;
+            height: 400px;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Switter</a>
+            <div class="navbar-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/all-users" class="nav-link">Users</a>
+                <a href="/chat" class="nav-link">Chat</a>
+                <a href="/social-graph" class="nav-link active">Graph</a>
+                <a href="/notifications" class="nav-link">Notifications</a>
+                <a href="/profile/<%= locals.user._id %>" class="nav-link">Profile</a>
+                <a href="/signout" class="btn btn-ghost btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold mb-2">Connection Finder</h1>
+                <p class="text-muted">Discover how you're connected to anyone on Switter</p>
+            </div>
+
+            <!-- Search Card -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h3 class="card-title">Find Connection</h3>
+                    <p class="card-description">Enter someone's email to see your connection path</p>
+                </div>
+                <div class="card-content">
+                    <form id="connection-form" class="flex gap-2">
+                        <input 
+                            type="email" 
+                            id="target-email" 
+                            class="input flex-1"
+                            placeholder="user@example.com"
+                            required
+                        >
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Find</span>
+                            <span class="btn-loading" style="display:none;">
+                                <span class="spinner"></span>
+                            </span>
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="flex gap-4 text-sm text-muted">
+                        <span>Your Friends: <strong><%= locals.user.friends ? locals.user.friends.length : 0 %></strong></span>
+                        <span>Your Email: <strong><%= locals.user.email %></strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="result-section" style="display:none;">
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <div id="connection-status"></div>
+                    </div>
+                    <div class="card-content">
+                        <div id="graph-visualization" class="mb-6">
+                            <h4 class="font-semibold mb-4">Connection Graph</h4>
+                            <div id="network-graph"></div>
+                        </div>
+                        <div id="path-details"></div>
+                    </div>
+                </div>
+
+                <div id="mutual-friends-section" style="display:none;" class="card mb-6">
+                    <div class="card-header">
+                        <h3 class="card-title">Mutual Friends</h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="mutual-friends-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestions Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Friend Suggestions</h3>
+                    <p class="card-description">People you might know (friends of friends)</p>
+                </div>
+                <div class="card-content">
+                    <button id="load-suggestions" class="btn btn-outline w-full">Load Suggestions</button>
+                    <div id="suggestions-list" class="mt-4"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const form = document.getElementById('connection-form');
+        const resultSection = document.getElementById('result-section');
+        let network = null;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const targetEmail = document.getElementById('target-email').value.trim();
+            const btnText = document.querySelector('.btn-text');
+            const btnLoading = document.querySelector('.btn-loading');
+            
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline';
+            form.querySelector('button').disabled = true;
+            
+            try {
+                const response = await fetch('/social-graph/find-connection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ targetEmail })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data.data);
+                } else {
+                    new Noty({
+                        theme: 'relax',
+                        text: data.message,
+                        type: 'error',
+                        layout: 'topRight',
+                        timeout: 3000
+                    }).show();
+                }
+            } catch(err) {
+                new Noty({
+                    theme: 'relax',
+                    text: 'Error finding connection',
+                    type: 'error',
+                    layout: 'topRight',
+                    timeout: 3000
+                }).show();
+            } finally {
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+                form.querySelector('button').disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            resultSection.style.display = 'block';
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+            
+            const statusDiv = document.getElementById('connection-status');
+            if (data.found) {
+                statusDiv.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="card-title">Connection Found!</h3>
+                            <p class="card-description">${data.message}</p>
+                        </div>
+                        <span class="badge badge-default ml-auto">Distance: ${data.distance}</span>
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-red-100 text-red-600">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="card-title">No Connection</h3>
+                            <p class="card-description">${data.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (data.found && data.path.length > 0) {
+                visualizeGraph(data.path);
+                displayPathDetails(data.path);
+                
+                if (data.distance === 1 && data.mutualFriends.length > 0) {
+                    document.getElementById('mutual-friends-section').style.display = 'block';
+                    displayMutualFriends(data.mutualFriends);
+                }
+            } else if (!data.found) {
+                // Show target user profile even when not connected
+                displayTargetUserProfile(data.targetUser);
+            }
+        }
+
+        function displayTargetUserProfile(targetUser) {
+            const pathDetails = document.getElementById('path-details');
+            pathDetails.innerHTML = `
+                <h4 class="font-semibold mb-4">User Found</h4>
+                <div class="card">
+                    <div class="card-content p-6 flex flex-col items-center text-center gap-4">
+                        <div class="avatar avatar-xl">
+                            ${targetUser.avatar ? 
+                                `<img src="${targetUser.avatar}" alt="${targetUser.name}" class="avatar-image">` :
+                                `<div class="avatar-fallback text-2xl">${targetUser.name.charAt(0).toUpperCase()}</div>`
+                            }
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold">${targetUser.name}</h3>
+                            <p class="text-sm text-muted">${targetUser.email}</p>
+                        </div>
+                        <p class="text-sm text-muted">You are not connected to this user yet. Add them as a friend to create a connection!</p>
+                        <a href="/profile/${targetUser._id}" class="btn btn-primary">View Profile</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function visualizeGraph(path) {
+            const container = document.getElementById('network-graph');
+            const nodes = [];
+            const edges = [];
+            
+            path.forEach((user, index) => {
+                const isStart = index === 0;
+                const isEnd = index === path.length - 1;
+                
+                nodes.push({
+                    id: user._id,
+                    label: user.name,
+                    shape: 'circularImage',
+                    image: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=667eea&color=fff&size=128&bold=true`,
+                    size: isStart || isEnd ? 50 : 40,
+                    borderWidth: isStart || isEnd ? 4 : 3,
+                    color: { 
+                        border: isStart ? '#22c55e' : isEnd ? '#ef4444' : '#667eea',
+                        background: '#ffffff'
+                    },
+                    font: {
+                        size: isStart || isEnd ? 16 : 14,
+                        color: '#000000',
+                        face: 'system-ui'
+                    }
+                });
+            });
+            
+            for (let i = 0; i < path.length - 1; i++) {
+                edges.push({
+                    from: path[i]._id,
+                    to: path[i + 1]._id,
+                    arrows: 'to',
+                    color: '#000',
+                    width: 2
+                });
+            }
+            
+            network = new vis.Network(container, { nodes, edges }, {
+                layout: { hierarchical: { direction: 'LR', sortMethod: 'directed' }},
+                physics: { enabled: false }
+            });
+        }
+
+        function displayPathDetails(path) {
+            let html = '<h4 class="font-semibold mb-4">Connection Path</h4><div class="flex flex-col gap-3">';
+            
+            path.forEach((user, index) => {
+                html += `
+                    <div class="flex items-center gap-3 p-3 rounded border">
+                        <div class="avatar">
+                            ${user.avatar ? 
+                                `<img src="${user.avatar}" alt="${user.name}" class="avatar-image">` :
+                                `<div class="avatar-fallback">${user.name.charAt(0).toUpperCase()}</div>`
+                            }
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold">${user.name} ${index === 0 ? '(You)' : index === path.length - 1 ? '(Target)' : ''}</p>
+                            <p class="text-sm text-muted">${user.email}</p>
+                        </div>
+                        ${index < path.length - 1 ? '<span class="text-muted">→</span>' : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            document.getElementById('path-details').innerHTML = html;
+        }
+
+        function displayMutualFriends(mutualFriends) {
+            let html = '';
+            mutualFriends.forEach(friend => {
+                html += `
+                    <div class="card">
+                        <div class="card-content p-4 flex flex-col items-center text-center gap-3">
+                            <div class="avatar avatar-lg">
+                                ${friend.avatar ? 
+                                    `<img src="${friend.avatar}" alt="${friend.name}" class="avatar-image">` :
+                                    `<div class="avatar-fallback text-xl">${friend.name.charAt(0).toUpperCase()}</div>`
+                                }
+                            </div>
+                            <div>
+                                <p class="font-semibold">${friend.name}</p>
+                                <p class="text-sm text-muted">${friend.email}</p>
+                            </div>
+                            <a href="/profile/${friend._id}" class="btn btn-outline btn-sm w-full">View Profile</a>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('mutual-friends-list').innerHTML = html;
+        }
+
+        document.getElementById('load-suggestions').addEventListener('click', async () => {
+            const btn = document.getElementById('load-suggestions');
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('/social-graph/suggestions');
+                const data = await response.json();
+                
+                if (data.success && data.data.suggestions.length > 0) {
+                    let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                    data.data.suggestions.forEach(suggestion => {
+                        const user = suggestion.user;
+                        html += `
+                            <div class="card">
+                                <div class="card-content p-4 flex items-center gap-3">
+                                    <div class="avatar">
+                                        ${user.avatar ? 
+                                            `<img src="${user.avatar}" alt="${user.name}" class="avatar-image">` :
+                                            `<div class="avatar-fallback">${user.name.charAt(0).toUpperCase()}</div>`
+                                        }
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-semibold">${user.name}</p>
+                                        <p class="text-sm text-muted">${suggestion.mutualCount} mutual friend${suggestion.mutualCount > 1 ? 's' : ''}</p>
+                                    </div>
+                                    <a href="/profile/${user._id}" class="btn btn-outline btn-sm">View</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    document.getElementById('suggestions-list').innerHTML = html;
+                } else {
+                    document.getElementById('suggestions-list').innerHTML = '<p class="text-center text-muted py-4">No suggestions available</p>';
+                }
+            } catch(err) {
+                new Noty({
+                    theme: 'relax',
+                    text: 'Error loading suggestions',
+                    type: 'error',
+                    layout: 'topRight',
+                    timeout: 3000
+                }).show();
+            } finally {
+                btn.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

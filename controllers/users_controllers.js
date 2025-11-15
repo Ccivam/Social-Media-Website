@@ -31,6 +31,25 @@ module.exports.createSession=function(req,res){
     }
 module.exports.profile=async function(req,res){
     try{
+        console.log('Loading profile for user:', req.params.id || req.user._id);
+        
+        const profileUserId = req.params.id || req.user._id;
+        
+        // Get profile user with populated friends
+        const profileUser = await User.findById(profileUserId)
+            .populate('friends', 'name avatar email')
+            .populate('friendRequests', 'name avatar email')
+            .populate('sentRequests', 'name avatar email');
+
+        console.log('Profile user found:', profileUser ? profileUser.name : 'NOT FOUND');
+
+        if (!profileUser) {
+            console.log('Profile user not found, redirecting');
+            req.flash('error', 'User not found');
+            return res.redirect('/');
+        }
+
+        // Get posts (all posts or just user's posts)
         const posts = await Post.find({})
             .sort('-createdAt')
             .populate('user')
@@ -43,22 +62,19 @@ module.exports.profile=async function(req,res){
             })
             .populate('likes');
 
-        const profileUserId = req.params.id || req.user._id;
-        const profileUser = await User.findById(profileUserId)
-            .populate('friends', 'name avatar email')
-            .populate('friendRequests', 'name avatar email')
-            .populate('sentRequests', 'name avatar email');
-
-        const allUsers = await User.find({});
+        console.log('Posts found:', posts.length);
+        console.log('Rendering profile page...');
 
         return res.render('user_profile',{
-            posts:posts,
-            profile_user:profileUser,
-            all_users:allUsers
+            title: profileUser.name + ' - Profile',
+            posts: posts,
+            profile_user: profileUser
         });
     }catch(err){
         console.log('Error loading profile:', err);
-        return res.redirect('back');
+        console.log('Error stack:', err.stack);
+        req.flash('error', 'Error loading profile');
+        return res.redirect('/');
     }
 }
 
@@ -107,15 +123,17 @@ module.exports.update=async function(req,res){
                                user.email=req.body.email;
                               if(req.file){
                                 //this is saving the path of the loaded file into the avatar field of the user
-                                if(fs.existsSync(path.join(__dirname,'..',user.avatar))){
-                                    
-                                 fs.unlinkSync(path.join(__dirname,'..',user.avatar));
+                                // Delete old avatar if it exists
+                                if(user.avatar && user.avatar.length > 0){
+                                    const oldAvatarPath = path.join(__dirname, '..', user.avatar);
+                                    if(fs.existsSync(oldAvatarPath)){
+                                        fs.unlinkSync(oldAvatarPath);
+                                    }
                                 }
                                 user.avatar=User.avatarPath+'/'+req.file.filename;
-                                
-
                                }
                                user.save();
+                               req.flash('success', 'Profile updated successfully');
                                return res.redirect('back');
                            }
                         })

@@ -2,109 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Switter - Home</title>
-    <link rel="stylesheet" href="/css/home.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/design-system.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
 </head>
 <body>
+    <!-- Navbar -->
     <nav class="navbar">
-        <div class="nav-container">
-            <a href="/" class="logo">Switter</a>
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Switter</a>
             <%if(locals.user){%>
-            <div class="nav-links">
-                <a href="/" class="active">Home</a>
-                <a href="/all-users">All Users</a>
-                <a href="/chat">Chat</a>
-                <a href="/notifications" id="notifications-link">Notifications <span class="notif-badge" style="display:none;">0</span></a>
-                <a href="/profile/<%= locals.user._id %>">Profile</a>
-                <a href="/signout">Logout</a>
+            <div class="navbar-nav">
+                <a href="/" class="nav-link active">Home</a>
+                <a href="/all-users" class="nav-link">Users</a>
+                <a href="/chat" class="nav-link">Chat</a>
+                <a href="/social-graph" class="nav-link">Graph</a>
+                <a href="/notifications" class="nav-link" id="notifications-link">
+                    Notifications
+                    <span class="badge badge-destructive" style="display:none; margin-left: 0.25rem;" id="notif-badge">0</span>
+                </a>
+                <a href="/profile/<%= locals.user._id %>" class="nav-link">Profile</a>
+                <a href="/signout" class="btn btn-ghost btn-sm">Logout</a>
             </div>
             <%} else {%>
-            <div class="nav-links">
-                <a href="/signin">Sign In</a>
-                <a href="/sign_up">Sign Up</a>
+            <div class="navbar-nav">
+                <a href="/users/auth/google" class="btn btn-primary btn-sm flex items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Sign in with Google
+                </a>
             </div>
             <%}%>
         </div>
     </nav>
 
-    <div class="container">
-        <%if(locals.user){%>
-        <div class="create-post-card">
-            <h2>What's on your mind?</h2>
-            <form action="/post/create" id="new-post-form" method="POST">
-                <textarea name="content" placeholder="Share your thoughts..." required></textarea>
-                <button type="submit" class="btn-post">Post</button>
-            </form>
-        </div>
-        <%}%>
+    <!-- Main Content -->
+    <main class="container py-8">
+        <div class="max-w-2xl mx-auto">
+            <%if(locals.user){%>
+            <!-- Create Post Card -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h3 class="card-title">Create Post</h3>
+                    <p class="card-description">Share your thoughts with the community</p>
+                </div>
+                <div class="card-content">
+                    <form action="/post/create" id="new-post-form" method="POST" class="flex flex-col gap-4">
+                        <textarea 
+                            name="content" 
+                            class="textarea" 
+                            placeholder="What's on your mind?" 
+                            required
+                            rows="3"
+                        ></textarea>
+                        <button type="submit" class="btn btn-primary">Post</button>
+                    </form>
+                </div>
+            </div>
+            <%}%>
 
-        <div class="posts-section">
-            <h2>Recent Posts</h2>
-            <div id="posts-list-container">
+            <!-- Posts Feed -->
+            <div class="flex flex-col gap-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-semibold">Recent Posts</h2>
+                </div>
+
                 <% if(posts.length === 0) { %>
-                    <p class="no-posts">No posts yet. Be the first to post!</p>
+                    <div class="card">
+                        <div class="card-content py-12 text-center">
+                            <p class="text-muted">No posts yet. Be the first to post!</p>
+                        </div>
+                    </div>
                 <% } else { %>
                     <% for(post of posts){%>
-                    <div class="post-card">
-                        <div class="post-header">
-                            <div class="post-author">
-                                <div class="author-avatar">
+                    <div class="card hover-lift">
+                        <!-- Post Header -->
+                        <div class="card-header">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar">
                                     <% if(post.user.avatar) { %>
-                                        <img src="<%= post.user.avatar %>" alt="<%= post.user.name %>">
+                                        <img src="<%= post.user.avatar %>" alt="<%= post.user.name %>" class="avatar-image">
                                     <% } else { %>
-                                        <div class="avatar-placeholder"><%= post.user.name.charAt(0).toUpperCase() %></div>
+                                        <div class="avatar-fallback"><%= post.user.name.charAt(0).toUpperCase() %></div>
                                     <% } %>
                                 </div>
-                                <div class="author-info">
-                                    <h4><%= post.user.name %></h4>
-                                    <span class="post-time"><%= new Date(post.createdAt).toLocaleDateString() %></span>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold"><%= post.user.name %></h4>
+                                    <p class="text-sm text-muted"><%= new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></p>
                                 </div>
+                                <%if(locals.user && locals.user._id.toString() === post.user._id.toString()){%>
+                                    <a href="/post/destroy/<%=post._id%>" class="btn btn-ghost btn-sm">Delete</a>
+                                <%}%>
                             </div>
                         </div>
-                        <div class="post-content">
-                            <p><%= post.content %></p>
+
+                        <!-- Post Content -->
+                        <div class="card-content">
+                            <p class="text-base"><%= post.content %></p>
                         </div>
-                        <div class="post-comments">
+
+                        <!-- Post Actions -->
+                        <div class="card-footer">
+                            <%if(locals.user){%>
+                                <a href="/likes/toggle/?id=<%=post._id%>&type=Post" class="toggle-like-button btn btn-ghost btn-sm" data-likes="<%=post.likes.length%>">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    </svg>
+                                    <span><%=post.likes.length%></span>
+                                </a>
+                            <%} else {%>
+                                <span class="text-sm text-muted"><%=post.likes.length%> likes</span>
+                            <%}%>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div class="separator"></div>
+                        <div class="card-content">
                             <%if (locals.user){%>
-                            <form action="/comments/create" method="post" class="comment-form">
-                                <input type="text" name="content" placeholder="Write a comment...">
+                            <form action="/comments/create" method="post" class="flex gap-2 mb-4">
+                                <input type="text" name="content" class="input" placeholder="Write a comment..." required>
                                 <input type="hidden" name="post" value="<%=post._id%>">
-                                <button type="submit">Comment</button>
+                                <button type="submit" class="btn btn-primary btn-sm">Comment</button>
                             </form>
                             <%}%>
                             
-                            <div class="comments-list">
-                                <%if(post.comment && post.comment.length > 0){%>
-                                    <h5>Comments</h5>
+                            <!-- Comments List -->
+                            <%if(post.comment && post.comment.length > 0){%>
+                                <div class="flex flex-col gap-3">
                                     <%for (comments of post.comment){%>
                                         <%if(comments.user){%>
-                                        <div class="comment-item">
-                                            <div class="comment-avatar">
+                                        <div class="flex gap-3">
+                                            <div class="avatar avatar-sm">
                                                 <% if(comments.user.avatar) { %>
-                                                    <img src="<%= comments.user.avatar %>" alt="<%= comments.user.name %>">
+                                                    <img src="<%= comments.user.avatar %>" alt="<%= comments.user.name %>" class="avatar-image">
                                                 <% } else { %>
-                                                    <div class="avatar-placeholder-small"><%= comments.user.name ? comments.user.name.charAt(0).toUpperCase() : 'U' %></div>
+                                                    <div class="avatar-fallback"><%= comments.user.name ? comments.user.name.charAt(0).toUpperCase() : 'U' %></div>
                                                 <% } %>
                                             </div>
-                                            <div class="comment-content">
-                                                <strong><%= comments.user.name || 'Unknown User' %></strong>
-                                                <p><%= comments.content %></p>
+                                            <div class="flex-1">
+                                                <div class="card">
+                                                    <div class="card-content p-3">
+                                                        <p class="font-semibold text-sm"><%= comments.user.name || 'Unknown User' %></p>
+                                                        <p class="text-sm"><%= comments.content %></p>
+                                                    </div>
+                                                </div>
+                                                <%if(locals.user && (locals.user._id.toString() === comments.user._id.toString() || locals.user._id.toString() === post.user._id.toString())){%>
+                                                    <a href="/comments/destroy/<%=comments._id%>" class="text-sm text-muted hover:text-foreground">Delete</a>
+                                                <%}%>
                                             </div>
                                         </div>
                                         <%}%>
                                     <%}%>
-                                <%}%>
-                            </div>
+                                </div>
+                            <%}%>
                         </div>
                     </div>
                     <%}%>
                 <% } %>
             </div>
         </div>
-    </div>
+    </main>
 
     <%if(locals.user){%>
     <script src="/socket.io/socket.io.js"></script>
@@ -115,7 +178,7 @@
                 const response = await fetch('/notifications/unread-count');
                 const data = await response.json();
                 if(data.success && data.data.count > 0) {
-                    const badge = document.querySelector('.notif-badge');
+                    const badge = document.getElementById('notif-badge');
                     if(badge) {
                         badge.textContent = data.data.count;
                         badge.style.display = 'inline';
@@ -126,7 +189,7 @@
             }
         }
 
-        if(document.querySelector('#notifications-link')) {
+        if(document.getElementById('notifications-link')) {
             updateNotificationBadge();
             setInterval(updateNotificationBadge, 30000);
         }
@@ -145,6 +208,26 @@
             console.log('Socket connection error:', err);
         }
         <% } %>
+
+        // Toggle likes
+        document.querySelectorAll('.toggle-like-button').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const url = button.getAttribute('href');
+                try {
+                    const response = await fetch(url, { method: 'POST' });
+                    const data = await response.json();
+                    if(data.success) {
+                        const span = button.querySelector('span');
+                        if(span) {
+                            span.textContent = data.data.likes;
+                        }
+                    }
+                } catch(err) {
+                    console.error('Error toggling like:', err);
+                }
+            });
+        });
     </script>
     <%}%>
 </body>

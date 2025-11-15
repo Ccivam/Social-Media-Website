@@ -59,9 +59,11 @@ module.exports.toggleLike=async function(req,res){
            }
          }
           return res.status(200).json({
+            success: true,
             message:"Request successful!",
             data:{
-                deleted:deleted
+                deleted:deleted,
+                likes: likeable.likes.length
             }
           });
     }catch(err){

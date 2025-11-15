@@ -43,16 +43,25 @@ module.exports.markAsRead = async function(req, res) {
     try {
         await Notification.findByIdAndUpdate(req.params.id, { read: true });
         
-        return res.json({
-            success: true,
-            message: 'Notification marked as read'
-        });
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({
+                success: true,
+                message: 'Notification marked as read'
+            });
+        }
+        
+        req.flash('success', 'Notification marked as read');
+        return res.redirect('back');
     } catch (err) {
         console.log('Error marking notification as read:', err);
-        return res.status(500).json({
-            success: false,
-            message: 'Error updating notification'
-        });
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(500).json({
+                success: false,
+                message: 'Error updating notification'
+            });
+        }
+        req.flash('error', 'Error updating notification');
+        return res.redirect('back');
     }
 };
 
@@ -64,16 +73,25 @@ module.exports.markAllAsRead = async function(req, res) {
             { read: true }
         );
         
-        return res.json({
-            success: true,
-            message: 'All notifications marked as read'
-        });
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({
+                success: true,
+                message: 'All notifications marked as read'
+            });
+        }
+        
+        req.flash('success', 'All notifications marked as read');
+        return res.redirect('back');
     } catch (err) {
         console.log('Error marking all as read:', err);
-        return res.status(500).json({
-            success: false,
-            message: 'Error updating notifications'
-        });
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(500).json({
+                success: false,
+                message: 'Error updating notifications'
+            });
+        }
+        req.flash('error', 'Error updating notifications');
+        return res.redirect('back');
     }
 };
 
@@ -156,5 +174,28 @@ module.exports.createNotification = async function(recipientId, senderId, type, 
         return notification;
     } catch (err) {
         console.log('Error creating notification:', err);
+    }
+};
+
+// Update notification settings
+module.exports.updateSettings = async function(req, res) {
+    try {
+        const settings = {
+            friendRequests: req.body.friendRequests === 'on',
+            comments: req.body.comments === 'on',
+            likes: req.body.likes === 'on',
+            messages: req.body.messages === 'on'
+        };
+
+        await User.findByIdAndUpdate(req.user._id, {
+            notificationSettings: settings
+        });
+
+        req.flash('success', 'Notification preferences updated');
+        return res.redirect('back');
+    } catch (err) {
+        console.log('Error updating notification settings:', err);
+        req.flash('error', 'Error updating preferences');
+        return res.redirect('back');
     }
 };

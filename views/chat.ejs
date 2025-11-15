@@ -3,63 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/css/chat.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Chat - Switter</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        .chat-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+            height: calc(100vh - 8rem);
+        }
+        .friends-list {
+            overflow-y: auto;
+        }
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+        }
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .message {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+        }
+        .message-sent {
+            align-self: flex-end;
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+        .message-received {
+            align-self: flex-start;
+            background-color: hsl(var(--muted));
+        }
+        .chat-input-form {
+            padding: 1.5rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+        @media (max-width: 768px) {
+            .chat-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-container">
-            <a href="/" class="logo">Switter</a>
-            <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="/all-users">All Users</a>
-                <a href="/chat" class="active">Chat</a>
-                <a href="/notifications" id="notifications-link">Notifications <span class="notif-badge" style="display:none;">0</span></a>
-                <a href="/profile/<%= locals.user._id %>">Profile</a>
-                <a href="/signout">Logout</a>
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Switter</a>
+            <div class="navbar-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/all-users" class="nav-link">Users</a>
+                <a href="/chat" class="nav-link active">Chat</a>
+                <a href="/social-graph" class="nav-link">Graph</a>
+                <a href="/notifications" class="nav-link">Notifications</a>
+                <a href="/profile/<%= locals.user._id %>" class="nav-link">Profile</a>
+                <a href="/signout" class="btn btn-ghost btn-sm">Logout</a>
             </div>
         </div>
     </nav>
 
-    <div class="chat-container">
-        <div class="friends-sidebar">
-            <h2>Friends</h2>
-            <div class="friends-list">
-                <% if(friends.length === 0) { %>
-                    <p class="no-friends">No friends yet. <a href="/all-users">Find friends</a></p>
-                <% } else { %>
-                    <% for(let friend of friends) { %>
-                        <div class="friend-item" data-friend-id="<%= friend._id %>" data-friend-name="<%= friend.name %>">
-                            <div class="friend-avatar">
-                                <% if(friend.avatar) { %>
-                                    <img src="<%= friend.avatar %>" alt="<%= friend.name %>">
-                                <% } else { %>
-                                    <div class="avatar-placeholder"><%= friend.name.charAt(0).toUpperCase() %></div>
+    <main class="container py-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="chat-layout">
+                <!-- Friends Sidebar -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Messages</h3>
+                        <p class="card-description"><%= friends.length %> friends</p>
+                    </div>
+                    <div class="card-content friends-list">
+                        <% if(friends.length === 0) { %>
+                            <div class="text-center py-8">
+                                <p class="text-sm text-muted mb-4">No friends yet</p>
+                                <a href="/all-users" class="btn btn-primary btn-sm">Find Friends</a>
+                            </div>
+                        <% } else { %>
+                            <div class="flex flex-col gap-1">
+                                <% for(let friend of friends) { %>
+                                    <button 
+                                        class="friend-item flex items-center gap-3 p-3 rounded hover:bg-accent w-full text-left"
+                                        data-friend-id="<%= friend._id %>"
+                                        data-friend-name="<%= friend.name %>"
+                                    >
+                                        <div class="avatar">
+                                            <% if(friend.avatar) { %>
+                                                <img src="<%= friend.avatar %>" alt="<%= friend.name %>" class="avatar-image">
+                                            <% } else { %>
+                                                <div class="avatar-fallback"><%= friend.name.charAt(0).toUpperCase() %></div>
+                                            <% } %>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-medium"><%= friend.name %></p>
+                                            <p class="text-sm text-muted"><%= friend.email %></p>
+                                        </div>
+                                    </button>
                                 <% } %>
                             </div>
-                            <div class="friend-info">
-                                <h4><%= friend.name %></h4>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="card chat-area">
+                    <div class="card-header" id="chat-header">
+                        <h3 class="card-title">Select a friend to start chatting</h3>
+                    </div>
+                    
+                    <div class="messages-container" id="messages-container">
+                        <div class="flex items-center justify-center h-full">
+                            <div class="text-center">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="mx-auto mb-4 text-muted">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <p class="text-muted">Select a friend to start messaging</p>
                             </div>
                         </div>
-                    <% } %>
-                <% } %>
-            </div>
-        </div>
+                    </div>
 
-        <div class="chat-area">
-            <div class="chat-header">
-                <h3 id="chat-friend-name">Select a friend to start chatting</h3>
-            </div>
-            <div class="messages-container" id="messages-container">
-                <p class="select-friend-msg">Select a friend from the left to start chatting</p>
-            </div>
-            <div class="message-input-container" id="message-input-container" style="display:none;">
-                <input type="text" id="message-input" placeholder="Type a message...">
-                <button id="send-btn">Send</button>
+                    <div class="chat-input-form" id="chat-input-area" style="display: none;">
+                        <form id="chat-form" class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="message-input" 
+                                class="input flex-1" 
+                                placeholder="Type a message..."
+                                required
+                            >
+                            <button type="submit" class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                                Send
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -70,115 +158,86 @@
 
         socket.emit('join', userId);
 
-        // Notification badge
-        async function updateNotificationBadge() {
-            try {
-                const response = await fetch('/notifications/unread-count');
-                const data = await response.json();
-                if(data.success && data.data.count > 0) {
-                    const badge = document.querySelector('.notif-badge');
-                    if(badge) {
-                        badge.textContent = data.data.count;
-                        badge.style.display = 'inline';
-                    }
-                }
-            } catch(err) {}
-        }
-        updateNotificationBadge();
-
         // Friend selection
         document.querySelectorAll('.friend-item').forEach(item => {
-            item.addEventListener('click', function() {
+            item.addEventListener('click', async function() {
                 currentFriendId = this.dataset.friendId;
                 currentFriendName = this.dataset.friendName;
-                
-                document.querySelectorAll('.friend-item').forEach(f => f.classList.remove('active'));
-                this.classList.add('active');
-                
-                document.getElementById('chat-friend-name').textContent = currentFriendName;
-                document.getElementById('message-input-container').style.display = 'flex';
-                
-                loadChatHistory(currentFriendId);
+
+                // Update active state
+                document.querySelectorAll('.friend-item').forEach(i => i.classList.remove('bg-accent'));
+                this.classList.add('bg-accent');
+
+                // Update header
+                document.getElementById('chat-header').innerHTML = `
+                    <h3 class="card-title">${currentFriendName}</h3>
+                `;
+
+                // Show input area
+                document.getElementById('chat-input-area').style.display = 'block';
+
+                // Load chat history
+                try {
+                    const response = await fetch(`/chat/history/${currentFriendId}`);
+                    const data = await response.json();
+                    displayMessages(data.data.messages);
+                } catch(err) {
+                    console.error('Error loading messages:', err);
+                }
             });
         });
 
-        // Load chat history
-        async function loadChatHistory(friendId) {
-            try {
-                const response = await fetch(`/chat/history/${friendId}`);
-                const data = await response.json();
-                
-                const container = document.getElementById('messages-container');
-                container.innerHTML = '';
-                
-                if(data.success && data.data.messages.length > 0) {
-                    data.data.messages.forEach(msg => {
-                        displayMessage(msg);
-                    });
-                } else {
-                    container.innerHTML = '<p class="no-messages">No messages yet. Start the conversation!</p>';
-                }
-                
-                scrollToBottom();
-            } catch(err) {
-                console.log('Error loading chat history:', err);
-            }
-        }
-
         // Send message
-        document.getElementById('send-btn').addEventListener('click', sendMessage);
-        document.getElementById('message-input').addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') sendMessage();
-        });
+        document.getElementById('chat-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
 
-        function sendMessage() {
-            const input = document.getElementById('message-input');
-            const message = input.value.trim();
-            
             if(message && currentFriendId) {
                 socket.emit('send_message', {
                     senderId: userId,
                     receiverId: currentFriendId,
                     message: message
                 });
-                
-                input.value = '';
+
+                // Add message to UI
+                addMessageToUI(message, true);
+                messageInput.value = '';
             }
+        });
+
+        // Receive message
+        socket.on('receive_message', (data) => {
+            console.log('Received message:', data);
+            if(data.sender._id === currentFriendId) {
+                addMessageToUI(data.message, false);
+            }
+        });
+
+        // Message sent confirmation
+        socket.on('message_sent', (data) => {
+            console.log('Message sent confirmation:', data);
+        });
+
+        function displayMessages(messages) {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+
+            messages.forEach(msg => {
+                const isSent = msg.sender._id === userId;
+                addMessageToUI(msg.message, isSent);
+            });
+
+            scrollToBottom();
         }
 
-        // Receive messages
-        socket.on('receive_message', (data) => {
-            if(data.sender._id === currentFriendId) {
-                displayMessage(data);
-                scrollToBottom();
-            }
-        });
-
-        socket.on('message_sent', (data) => {
-            if(data.receiver._id === currentFriendId || data.receiver === currentFriendId) {
-                displayMessage(data);
-                scrollToBottom();
-            }
-        });
-
-        function displayMessage(msg) {
+        function addMessageToUI(message, isSent) {
             const container = document.getElementById('messages-container');
-            const noMsg = container.querySelector('.no-messages, .select-friend-msg');
-            if(noMsg) noMsg.remove();
-            
-            const isSender = msg.sender._id === userId || msg.sender === userId;
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isSender ? 'sent' : 'received'}`;
-            
-            const senderName = isSender ? 'You' : (msg.sender.name || currentFriendName);
-            messageDiv.innerHTML = `
-                <div class="message-content">
-                    <p>${msg.message}</p>
-                    <span class="message-time">${new Date(msg.createdAt).toLocaleTimeString()}</span>
-                </div>
-            `;
-            
+            messageDiv.className = `message ${isSent ? 'message-sent' : 'message-received'}`;
+            messageDiv.textContent = message;
             container.appendChild(messageDiv);
+            scrollToBottom();
         }
 
         function scrollToBottom() {

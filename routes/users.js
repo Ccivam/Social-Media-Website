@@ -17,6 +17,7 @@ router.use('/friends',require('./friends'));
 router.use('/chat',require('./chat'));
 router.use('/notifications',require('./notifications'));
 router.use('/twitter',require('./twitter'));
+router.use('/social-graph',require('./social_graph'));
 router.get('/update-Information',userController.updateInformation);
 router.get('/all-users',passport.checkAuthentication,require('../controllers/all_users_controller').allUsers);
 //use passport as a middleware 

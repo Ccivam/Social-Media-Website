@@ -7,6 +7,7 @@ router.get('/', passport.checkAuthentication, notificationsController.getNotific
 router.get('/unread-count', passport.checkAuthentication, notificationsController.getUnreadCount);
 router.post('/mark-read/:id', passport.checkAuthentication, notificationsController.markAsRead);
 router.post('/mark-all-read', passport.checkAuthentication, notificationsController.markAllAsRead);
+router.post('/settings', passport.checkAuthentication, notificationsController.updateSettings);
 router.delete('/:id', passport.checkAuthentication, notificationsController.deleteNotification);
 
 module.exports = router;

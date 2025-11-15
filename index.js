@@ -24,6 +24,7 @@ const flash=require('connect-flash');
 const customMware=require('./config/middleware');
 const alert=require('alert');
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Parse JSON bodies
 app.use(cookieParser());
 
 app.set('view engine','ejs');
