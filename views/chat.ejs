@@ -8,46 +8,120 @@
     <style>
         .chat-layout {
             display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 1.5rem;
-            height: calc(100vh - 8rem);
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            height: calc(100vh - 7rem);
         }
+        
+        @media (min-width: 768px) {
+            .chat-layout {
+                grid-template-columns: 280px 1fr;
+                gap: 1.5rem;
+                height: calc(100vh - 8rem);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .chat-layout {
+                grid-template-columns: 320px 1fr;
+            }
+        }
+        
         .friends-list {
             overflow-y: auto;
+            max-height: 300px;
         }
+        
+        @media (min-width: 768px) {
+            .friends-list {
+                max-height: none;
+            }
+        }
+        
         .chat-area {
             display: flex;
             flex-direction: column;
+            min-height: 400px;
         }
+        
+        @media (min-width: 768px) {
+            .chat-area {
+                min-height: auto;
+            }
+        }
+        
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 1.5rem;
+            padding: 0.75rem;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.75rem;
+            -webkit-overflow-scrolling: touch;
         }
+        
+        @media (min-width: 768px) {
+            .messages-container {
+                padding: 1.5rem;
+                gap: 1rem;
+            }
+        }
+        
         .message {
-            max-width: 70%;
-            padding: 0.75rem 1rem;
+            max-width: 85%;
+            padding: 0.625rem 0.875rem;
             border-radius: 1rem;
+            word-wrap: break-word;
+            font-size: 0.875rem;
         }
+        
+        @media (min-width: 768px) {
+            .message {
+                max-width: 70%;
+                padding: 0.75rem 1rem;
+                font-size: 0.9375rem;
+            }
+        }
+        
         .message-sent {
             align-self: flex-end;
             background-color: hsl(var(--primary));
             color: hsl(var(--primary-foreground));
         }
+        
         .message-received {
             align-self: flex-start;
             background-color: hsl(var(--muted));
         }
+        
         .chat-input-form {
-            padding: 1.5rem;
+            padding: 0.75rem;
             border-top: 1px solid hsl(var(--border));
         }
-        @media (max-width: 768px) {
-            .chat-layout {
-                grid-template-columns: 1fr;
+        
+        @media (min-width: 768px) {
+            .chat-input-form {
+                padding: 1.5rem;
+            }
+        }
+        
+        .chat-input-form form {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .friend-item {
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        
+        .friend-item.active {
+            background-color: hsl(var(--accent));
+        }
+        
+        @media (max-width: 767px) {
+            .friends-sidebar-mobile {
+                position: relative;
             }
         }
     </style>
@@ -127,20 +201,22 @@
                     </div>
 
                     <div class="chat-input-form" id="chat-input-area" style="display: none;">
-                        <form id="chat-form" class="flex gap-2">
+                        <form id="chat-form">
                             <input 
                                 type="text" 
                                 id="message-input" 
-                                class="input flex-1" 
+                                class="input" 
                                 placeholder="Type a message..."
                                 required
+                                style="flex: 1;"
                             >
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" style="flex-shrink: 0;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="22" y1="2" x2="11" y2="13"></line>
                                     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                                 </svg>
-                                Send
+                                <span class="sm:hidden">Send</span>
+                                <span class="hidden sm:inline">Send</span>
                             </button>
                         </form>
                     </div>
@@ -165,8 +241,12 @@
                 currentFriendName = this.dataset.friendName;
 
                 // Update active state
-                document.querySelectorAll('.friend-item').forEach(i => i.classList.remove('bg-accent'));
+                document.querySelectorAll('.friend-item').forEach(i => {
+                    i.classList.remove('bg-accent');
+                    i.classList.remove('active');
+                });
                 this.classList.add('bg-accent');
+                this.classList.add('active');
 
                 // Update header
                 document.getElementById('chat-header').innerHTML = `

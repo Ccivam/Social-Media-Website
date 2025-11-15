@@ -11,9 +11,37 @@
     <style>
         #network-graph {
             width: 100%;
-            height: 400px;
+            height: 300px;
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
+        }
+        
+        @media (min-width: 768px) {
+            #network-graph {
+                height: 400px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            #network-graph {
+                height: 500px;
+            }
+        }
+        
+        .bg-green-100 {
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+        
+        .text-green-600 {
+            color: #16a34a;
+        }
+        
+        .bg-red-100 {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+        
+        .text-red-600 {
+            color: #dc2626;
         }
     </style>
 </head>
@@ -47,26 +75,28 @@
                     <p class="card-description">Enter someone's email to see your connection path</p>
                 </div>
                 <div class="card-content">
-                    <form id="connection-form" class="flex gap-2">
-                        <input 
-                            type="email" 
-                            id="target-email" 
-                            class="input flex-1"
-                            placeholder="user@example.com"
-                            required
-                        >
-                        <button type="submit" class="btn btn-primary">
-                            <span class="btn-text">Find</span>
-                            <span class="btn-loading" style="display:none;">
-                                <span class="spinner"></span>
-                            </span>
-                        </button>
+                    <form id="connection-form">
+                        <div class="flex flex-col gap-2">
+                            <input 
+                                type="email" 
+                                id="target-email" 
+                                class="input"
+                                placeholder="user@example.com"
+                                required
+                            >
+                            <button type="submit" class="btn btn-primary w-full">
+                                <span class="btn-text">Find Connection</span>
+                                <span class="btn-loading" style="display:none;">
+                                    <span class="spinner"></span>
+                                </span>
+                            </button>
+                        </div>
                     </form>
                 </div>
                 <div class="card-footer">
-                    <div class="flex gap-4 text-sm text-muted">
+                    <div class="flex flex-col gap-2 text-sm text-muted">
                         <span>Your Friends: <strong><%= locals.user.friends ? locals.user.friends.length : 0 %></strong></span>
-                        <span>Your Email: <strong><%= locals.user.email %></strong></span>
+                        <span class="text-xs break-all">Your Email: <strong><%= locals.user.email %></strong></span>
                     </div>
                 </div>
             </div>
