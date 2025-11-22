@@ -14,9 +14,9 @@ const development={
     asset_path:'./assets',
     session_cookie_key:'blahsomething',
     db:'codeial_production',
-    google_client_id: process.env.GOOGLE_CLIENT_ID || "716926697135-1p7g1tep9ube9hoig17e2nc3d8kj8rog.apps.googleusercontent.com",
-    google_client_secret: process.env.GOOGLE_CLIENT_SECRET || "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",
-    google_call_back_url: process.env.GOOGLE_CALLBACK_URL || "http://localhost:8000/users/auth/google/callback",
+    google_client_id: process.env.GOOGLE_CLIENT_ID,
+    google_client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    google_call_back_url: process.env.GOOGLE_CALLBACK_URL,
     jwt_key:"switter",
     morgan:{
         mode:'dev',
